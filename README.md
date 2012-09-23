@@ -1,28 +1,22 @@
-# Fullcalendar::Rails
+# FullCalendar for Rails
 
-This gem is a simple rebundling of the contents of the JQuery FullCalendar plugin from Adam Shaw:
+FullCalendar packaged for the Rails 3.1+ asset pipeline.
+Check [FullCalendar project home page](http://arshaw.com/fullcalendar/) and [GitHub page](https://github.com/arshaw/fullcalendar).
 
-http://arshaw.com/fullcalendar/
+This gem is forked from https://github.com/bokmann/fullcalendar-rails which does not include gcal.js and has not been updated to the latest version.
+You can read more about the reasons behind this fork [here](https://github.com/bokmann/fullcalendar-rails/commit/0b1b3506ce81cab733fb840749852eafc626e593#commitcomment-1416352) and check the [pull request to the original fullcalendar-rails repository](https://github.com/bokmann/fullcalendar-rails/pull/3).
 
-I had created an earlier version of a demonstration of using FullCalendar in a rails app.  That code is available at:
-
-https://github.com/bokmann/rails3_fullcalendar
-
-But I have always disliked finding random files and copying them into a public directory.  So I made an asset gem for use with the asset pipeline.
+There is another gem at https://github.com/mankind/fullcalendar-rails but [the implementation is lacking](https://github.com/mankind/fullcalendar-rails/issues/3).
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
-    gem 'fullcalendar-rails'
+    gem 'fullcalendar-rails', github: 'tkrotoff/fullcalendar-rails'
 
 And then execute:
 
     $ bundle
-
-Or install it yourself as:
-
-    $ gem install fullcalendar-rails
 
 ## Usage
 
@@ -34,10 +28,6 @@ Add the following JavaScript file to `app/assets/javascripts/application.js`:
 Add the following stylesheet file to `app/assets/stylesheets/application.css`:
 
     *= require fullcalendar/fullcalendar.css
-
-## Versioning
-
-I am going to version this gem with the version of the fullceldnar code I use, adding an extra digit if I need to release any maintenance versions of the gem itself.  Therefore, since this is a first version of this gem and I'm starting by bundling version 1.5.3 of the fullcalendar code, this is version 1.5.4.0
 
 ## Contributing
 
