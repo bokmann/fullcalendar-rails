@@ -37,7 +37,7 @@ Add the following stylesheet file to `app/assets/stylesheets/application.css`:
 
 ## Versioning
 
-I am going to version this gem with the version of the fullceldnar code I use, adding an extra digit if I need to release any maintenance versions of the gem itself.  Therefore, since this is a first version of this gem and I'm starting by bundling version 1.5.3 of the fullcalendar code, this is version 1.5.3.0
+I am going to version this gem with the version of the fullceldnar code I use, adding an extra digit if I need to release any maintenance versions of the gem itself.  Therefore, since this is a first version of this gem and I'm starting by bundling version 1.5.3 of the fullcalendar code, this is version 1.5.4.0
 
 ## Contributing
 
