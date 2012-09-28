@@ -22,12 +22,12 @@ And then execute:
 
 Add the following JavaScript file to `app/assets/javascripts/application.js`:
 
-    //= require fullcalendar/fullcalendar.js
+    //= require fullcalendar
     //= require fullcalendar/gcal.js <--- In case you need Google Calendar support
 
 Add the following stylesheet file to `app/assets/stylesheets/application.css`:
 
-    *= require fullcalendar/fullcalendar.css
+    *= require fullcalendar
 
 ## Contributing
 
