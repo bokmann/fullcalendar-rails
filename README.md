@@ -27,16 +27,16 @@ Or install it yourself as:
 
 At this point, the files from the fullcalendar project are in your asset pipeline's path... all you have to do is require them in the appropriate places.  For instance, in your application.css.scss:
 
-  *= require fullcalendar
-  *= require fullcalendar.print
+    *= require fullcalendar
+    *= require fullcalendar.print
 
 And in your application.js:
 
-  //= require fullcalendar
+    //= require fullcalendar
 
 While its not needed for this library, the original javascript library's author also includes an adapter for integrating google calendars as an event source:
 
-  //= require gcal
+    //= require gcal
 
 ## Usage
 
