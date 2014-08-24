@@ -1,3 +1,9 @@
+# Seeking Help
+
+We've recently had a couple pull requests, contributions, comments, issues, etc.  Are any of those people interested in helping to be a maintainer of this gem?  It's not a huge effort, I'm just overwhelmed with new work stuff and could use a hand.  I'll give you commit access, add you as a maintainer at RubyGems, etc.
+
+Contact me, please.
+
 # Fullcalendar::Rails
 
 This gem is a simple rebundling of the contents of the JQuery FullCalendar plugin from Adam Shaw:
