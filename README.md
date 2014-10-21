@@ -1,18 +1,12 @@
-# Seeking Help
-
-We've recently had a couple pull requests, contributions, comments, issues, etc.  Are any of those people interested in helping to be a maintainer of this gem?  It's not a huge effort, I'm just overwhelmed with new work stuff and could use a hand.  I'll give you commit access, add you as a maintainer at RubyGems, etc.
-
-Contact me, please.
-
 # Fullcalendar::Rails
 
-This gem is a simple rebundling of the contents of the JQuery FullCalendar plugin from Adam Shaw:
+This gem for Ruby on Rails is a simple rebundlingof the contents of the jQuery FullCalendar plugin from Adam Shaw:
 
 http://arshaw.com/fullcalendar/
 
-I had created an earlier version of a demonstration of using FullCalendar in a rails app.  That code is available at:
+I had created an earlier version of a demonstration of using FullCalendar in a Rails app.  That code is available at:
 
-https://github.com/bokmann/rails3_fullcalendar
+https://github.com/bokmann/fullcalendar_assets
 
 But I have always disliked finding random files and copying them into a public directory.  So I made an asset gem for use with the asset pipeline.
 
@@ -23,7 +17,13 @@ Add this line to your application's Gemfile:
 
     gem 'fullcalendar-rails'
 
-And then execute:
+If you need a specific version of FullCalendar (e.g X.Y.Z), you can explicitly require it like this:
+
+    gem 'fullcalendar-rails', '~> X.Y.Z.0'
+
+(Note that the last number ("0" in the line above) indicates the release of this gem, so it may change for the same version of FullCalender, see Versioning section below)
+
+Finally execute:
 
     $ bundle
 
@@ -31,7 +31,7 @@ Or install it yourself as:
 
     $ gem install fullcalendar-rails
 
-At this point, the files from the fullcalendar project are in your asset pipeline's path... all you have to do is require them in the appropriate places.  For instance, in your application.css.scss:
+At this point, the files from the FullCalendar project are in your asset pipeline's path... all you have to do is require them in the appropriate places.  For instance, in your application.css.scss:
 
     *= require fullcalendar
 
@@ -60,7 +60,7 @@ While its not needed for this library, the original javascript library's author 
 
 ## Usage
 
-See the website of the original project for the usage, or my original Rails3 example I point to above.  This gem just saves you from having to locate and copy the javascript and stylesheet into place.
+See the website of the original project for the usage, or my original Rails 3 example I point to above.  This gem just saves you from having to locate and copy the javascript and stylesheet into place.
 
 http://arshaw.com/fullcalendar/
 
@@ -72,7 +72,7 @@ As such, these are primarily for my own use, and may occasionally fall out of da
 
 ## Versioning
 
-I am going to version this gem with the version of the fullcalendar code I use, adding an extra digit if I need to release any maintenance versions of the gem itself.
+I am going to version this gem with the version of the FullCalendar code I use, adding an extra digit if I need to release any maintenance versions of the gem itself.
 
 ## Contributing
 
