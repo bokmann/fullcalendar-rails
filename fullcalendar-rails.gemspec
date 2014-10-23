@@ -14,6 +14,7 @@ Gem::Specification.new do |gem|
   gem.name          = "fullcalendar-rails"
   gem.require_paths = ["lib"]
   gem.version       = Fullcalendar::Rails::VERSION
-  
+
+  gem.add_runtime_dependency 'jquery-rails', '>= 3.1.1'
   gem.add_development_dependency "rake"
 end
