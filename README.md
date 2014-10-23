@@ -54,9 +54,13 @@ and then in your layouts where you need it, add:
     <%= stylesheet_link_tag "application-print", :media => "print" %>
 
 
-While its not needed for this library, the original javascript library's author also includes an adapter for integrating google calendars as an event source:
+While its not needed for this library, the original javascript library's author also includes an adapter for integrating google calendars as an event source. For pre-2.1.1-versions of this gem, use:
 
     //= require gcal
+
+Since version 2.1.1 of this gem, gcal and all other related javascript files (lang-all.js and individual language files) have been relocated to a subdirectory as requested in issue #24:
+
+    //= require fullcalendar/gcal
 
 ## Usage
 
