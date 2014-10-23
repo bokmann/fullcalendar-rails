@@ -16,6 +16,7 @@ Gem::Specification.new do |gem|
   gem.version       = Fullcalendar::Rails::VERSION
   gem.license       = 'MIT'
 
+  gem.add_runtime_dependency 'jquery-rails', '>= 3.1.1'
   gem.add_runtime_dependency 'momentjs-rails', '~> 2.8.3'
   gem.add_development_dependency 'rake'
 end
