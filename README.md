@@ -23,7 +23,15 @@ If you need a specific version of FullCalendar (e.g X.Y.Z), you can explicitly r
 
 (Note that the last number ("0" in the line above) indicates the release of this gem, so it may change for the same version of FullCalender, see Versioning section below)
 
-Since version 2.1.1.0 of this gem, the gems `jquery-rails` and `momentjs-rails` are included as dependencies. If you copied moment.js manually into your project, you have to delete the file so it doesn't clash with the required version from the gem.
+Since version 2.1.1.0 of this gem, the gems `jquery-rails` and `momentjs-rails` are included as dependencies. If you copied moment.js manually into your project, you have to delete the file so it doesn't clash with the required version from the gem. You have to also add
+
+    gem 'momentjs-rails'
+    
+to your Gemfile and
+
+    //= require moment
+
+to yout application.js manifest.
 
 Finally execute:
 
