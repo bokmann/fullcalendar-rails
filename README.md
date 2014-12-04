@@ -31,7 +31,7 @@ to your Gemfile and
 
     //= require moment
 
-to yout application.js manifest.
+to your application.js manifest (before requiring fullcalendar).
 
 Finally execute:
 
