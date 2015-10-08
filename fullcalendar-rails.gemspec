@@ -17,6 +17,6 @@ Gem::Specification.new do |gem|
   gem.license       = 'MIT'
 
   gem.add_runtime_dependency 'jquery-rails', '>= 3.1.1', '< 5.0.0'
-  gem.add_runtime_dependency 'momentjs-rails', '~> 2.8', '>= 2.8.4'
+  gem.add_runtime_dependency 'momentjs-rails', '>= 2.9.0'
   gem.add_development_dependency 'rake', '~> 0'
 end
