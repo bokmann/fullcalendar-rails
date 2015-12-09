@@ -1,6 +1,6 @@
 # Fullcalendar::Rails
 
-This gem for Ruby on Rails is a simple rebundlingof the contents of the jQuery FullCalendar plugin from Adam Shaw:
+This gem for Ruby on Rails is a simple rebundling of the contents of the jQuery FullCalendar plugin from Adam Shaw:
 
 http://arshaw.com/fullcalendar/
 
