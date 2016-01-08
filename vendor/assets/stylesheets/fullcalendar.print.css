@@ -1,5 +1,5 @@
 /*!
- * FullCalendar v2.5.0 Print Stylesheet
+ * FullCalendar v2.6.0 Print Stylesheet
  * Docs & License: http://fullcalendar.io/
  * (c) 2015 Adam Shaw
  */
@@ -42,11 +42,17 @@ tbody,
 	background: #fff !important;
 }
 
-/* kill the overlaid, absolutely-positioned common components */
+/* kill the overlaid, absolutely-positioned components */
+/* common... */
 .fc-bg,
 .fc-bgevent-skeleton,
 .fc-highlight-skeleton,
-.fc-helper-skeleton {
+.fc-helper-skeleton,
+/* for timegrid. within cells within table skeletons... */
+.fc-bgevent-container,
+.fc-business-container,
+.fc-highlight-container,
+.fc-helper-container {
 	display: none;
 }
 

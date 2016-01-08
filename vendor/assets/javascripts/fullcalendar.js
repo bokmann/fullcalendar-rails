@@ -1,5 +1,5 @@
 /*!
- * FullCalendar v2.5.0
+ * FullCalendar v2.6.0
  * Docs & License: http://fullcalendar.io/
  * (c) 2015 Adam Shaw
  */
@@ -19,8 +19,8 @@
 ;;
 
 var FC = $.fullCalendar = {
-	version: "2.5.0",
-	internalApiVersion: 1
+	version: "2.6.0",
+	internalApiVersion: 2
 };
 var fcViews = FC.views = {};
 
@@ -247,7 +247,7 @@ function undistributeHeight(els) {
 function matchCellWidths(els) {
 	var maxInnerWidth = 0;
 
-	els.find('> *').each(function(i, innerEl) {
+	els.find('> span').each(function(i, innerEl) {
 		var innerWidth = $(innerEl).outerWidth();
 		if (innerWidth > maxInnerWidth) {
 			maxInnerWidth = innerWidth;
@@ -3415,8 +3415,38 @@ var Grid = FC.Grid = Class.extend({
 	},
 
 
-	/* Fill System (highlight, background events, business hours)
+	/* Business Hours
 	------------------------------------------------------------------------------------------------------------------*/
+
+
+	renderBusinessHours: function() {
+	},
+
+
+	unrenderBusinessHours: function() {
+	},
+
+
+	/* Now Indicator
+	------------------------------------------------------------------------------------------------------------------*/
+
+
+	getNowIndicatorUnit: function() {
+	},
+
+
+	renderNowIndicator: function(date) {
+	},
+
+
+	unrenderNowIndicator: function() {
+	},
+
+
+	/* Fill System (highlight, background events, business hours)
+	--------------------------------------------------------------------------------------------------------------------
+	TODO: remove this system. like we did in TimeGrid
+	*/
 
 
 	// Renders a set of rectangles over the given segments of time.
@@ -3511,7 +3541,7 @@ var Grid = FC.Grid = Class.extend({
 	// Computes HTML classNames for a single-day element
 	getDayClasses: function(date) {
 		var view = this.view;
-		var today = view.calendar.getNow().stripTime();
+		var today = view.calendar.getNow();
 		var classes = [ 'fc-' + dayIDs[date.day()] ];
 
 		if (
@@ -3550,7 +3580,7 @@ Grid.mixin({
 	isDraggingSeg: false, // is a segment being dragged? boolean
 	isResizingSeg: false, // is a segment being resized? boolean
 	isDraggingExternal: false, // jqui-dragging an external element? boolean
-	segs: null, // the event segments currently rendered in the grid
+	segs: null, // the *event* segments currently rendered in the grid. TODO: rename to `eventSegs`
 
 
 	// Renders the given events onto the grid
@@ -3839,7 +3869,7 @@ Grid.mixin({
 					event
 				);
 
-				if (dropLocation &&!calendar.isEventSpanAllowed(_this.eventToSpan(dropLocation), event)) {
+				if (dropLocation && !calendar.isEventSpanAllowed(_this.eventToSpan(dropLocation), event)) {
 					disableCursor();
 					dropLocation = null;
 				}
@@ -3902,6 +3932,7 @@ Grid.mixin({
 	// Given the spans an event drag began, and the span event was dropped, calculates the new zoned start/end/allDay
 	// values for the event. Subclasses may override and set additional properties to be used by renderDrag.
 	// A falsy returned value indicates an invalid drop.
+	// DOES NOT consider overlap/constraint.
 	computeEventDrop: function(startSpan, endSpan, event) {
 		var calendar = this.view.calendar;
 		var dragStart = startSpan.start;
@@ -3991,6 +4022,7 @@ Grid.mixin({
 	// Called when a jQuery UI drag starts and it needs to be monitored for dropping
 	listenToExternalDrag: function(el, ev, ui) {
 		var _this = this;
+		var calendar = this.view.calendar;
 		var meta = getDraggedElMeta(el); // extra data about event drop, including possible event to create
 		var dropLocation; // a null value signals an unsuccessful drag
 
@@ -4004,22 +4036,27 @@ Grid.mixin({
 					hit.component.getHitSpan(hit), // since we are querying the parent view, might not belong to this grid
 					meta
 				);
+
+				if ( // invalid hit?
+					dropLocation &&
+					!calendar.isExternalSpanAllowed(_this.eventToSpan(dropLocation), dropLocation, meta.eventProps)
+				) {
+					disableCursor();
+					dropLocation = null;
+				}
+
 				if (dropLocation) {
 					_this.renderDrag(dropLocation); // called without a seg parameter
-				}
-				else { // invalid hit
-					disableCursor();
 				}
 			},
 			hitOut: function() {
 				dropLocation = null; // signal unsuccessful
-				_this.unrenderDrag();
+			},
+			hitDone: function() { // Called after a hitOut OR before a dragStop
 				enableCursor();
+				_this.unrenderDrag();
 			},
 			dragStop: function() {
-				_this.unrenderDrag();
-				enableCursor();
-
 				if (dropLocation) { // element was dropped on a valid hit
 					_this.view.reportExternalDrop(meta, dropLocation, el, ev, ui);
 				}
@@ -4036,6 +4073,7 @@ Grid.mixin({
 	// Given a hit to be dropped upon, and misc data associated with the jqui drag (guaranteed to be a plain object),
 	// returns the zoned start/end dates for the event that would result from the hypothetical drop. end might be null.
 	// Returning a null value signals an invalid drop hit.
+	// DOES NOT consider overlap/constraint.
 	computeExternalDrop: function(span, meta) {
 		var calendar = this.view.calendar;
 		var dropLocation = {
@@ -4050,10 +4088,6 @@ Grid.mixin({
 
 		if (meta.duration) {
 			dropLocation.end = dropLocation.start.clone().add(meta.duration);
-		}
-
-		if (!calendar.isExternalSpanAllowed(this.eventToSpan(dropLocation), dropLocation, meta.eventProps)) {
-			return null;
 		}
 
 		return dropLocation;
@@ -4176,7 +4210,8 @@ Grid.mixin({
 
 
 	// Returns new zoned date information for an event segment being resized from its start OR end
-	// `type` is either 'start' or 'end'
+	// `type` is either 'start' or 'end'.
+	// DOES NOT consider overlap/constraint.
 	computeEventResize: function(type, startSpan, endSpan, event) {
 		var calendar = this.view.calendar;
 		var delta = this.diffDates(endSpan[type], startSpan[type]);
@@ -4323,18 +4358,25 @@ Grid.mixin({
 
 
 	// Generates an array of segments for the given single event
+	// Can accept an event "location" as well (which only has start/end and no allDay)
 	eventToSegs: function(event) {
 		return this.eventsToSegs([ event ]);
 	},
 
 
-	// Generates a single span (always unzoned) by using the given event's dates.
-	// Does not do any inverting for inverse-background events.
 	eventToSpan: function(event) {
-		var range = this.eventToRange(event);
-		this.transformEventSpan(range, event); // convert it to a span, in-place
-		return range;
+		return this.eventToSpans(event)[0];
 	},
+
+
+	// Generates spans (always unzoned) for the given event.
+	// Does not do any inverting for inverse-background events.
+	// Can accept an event "location" as well (which only has start/end and no allDay)
+	eventToSpans: function(event) {
+		var range = this.eventToRange(event);
+		return this.eventRangeToSpans(range, event);
+	},
+
 
 
 	// Converts an array of event objects into an array of event segment objects.
@@ -4358,13 +4400,15 @@ Grid.mixin({
 				ranges = _this.invertRanges(ranges);
 
 				for (i = 0; i < ranges.length; i++) {
-					_this.generateEventSegs(ranges[i], events[0], segSliceFunc, segs);
+					segs.push.apply(segs, // append to
+						_this.eventRangeToSegs(ranges[i], events[0], segSliceFunc));
 				}
 			}
 			// normal event ranges
 			else {
 				for (i = 0; i < ranges.length; i++) {
-					_this.generateEventSegs(ranges[i], events[i], segSliceFunc, segs);
+					segs.push.apply(segs, // append to
+						_this.eventRangeToSegs(ranges[i], events[i], segSliceFunc));
 				}
 			}
 		});
@@ -4374,44 +4418,62 @@ Grid.mixin({
 
 
 	// Generates the unzoned start/end dates an event appears to occupy
+	// Can accept an event "location" as well (which only has start/end and no allDay)
 	eventToRange: function(event) {
 		return {
 			start: event.start.clone().stripZone(),
-			end: this.view.calendar.getEventEnd(event).stripZone()
+			end: (
+				event.end ?
+					event.end.clone() :
+					// derive the end from the start and allDay. compute allDay if necessary
+					this.view.calendar.getDefaultEventEnd(
+						event.allDay != null ?
+							event.allDay :
+							!event.start.hasTime(),
+						event.start
+					)
+			).stripZone()
 		};
 	},
 
 
-	// Given an event's span (unzoned start/end and other misc data), and the event itself,
-	// slice into segments (using the segSliceFunc function if specified) and append to the `out` array.
-	// SIDE EFFECT: will mutate the given `range`.
-	generateEventSegs: function(range, event, segSliceFunc, out) {
-		var segs;
+	// Given an event's range (unzoned start/end), and the event itself,
+	// slice into segments (using the segSliceFunc function if specified)
+	eventRangeToSegs: function(range, event, segSliceFunc) {
+		var spans = this.eventRangeToSpans(range, event);
+		var segs = [];
 		var i;
 
-		this.transformEventSpan(range, event); // converts the range to a span
+		for (i = 0; i < spans.length; i++) {
+			segs.push.apply(segs, // append to
+				this.eventSpanToSegs(spans[i], event, segSliceFunc));
+		}
 
-		segs = segSliceFunc ? segSliceFunc(range) : this.spanToSegs(range);
+		return segs;
+	},
+
+
+	// Given an event's unzoned date range, return an array of "span" objects.
+	// Subclasses can override.
+	eventRangeToSpans: function(range, event) {
+		return [ $.extend({}, range) ]; // copy into a single-item array
+	},
+
+
+	// Given an event's span (unzoned start/end and other misc data), and the event itself,
+	// slices into segments and attaches event-derived properties to them.
+	eventSpanToSegs: function(span, event, segSliceFunc) {
+		var segs = segSliceFunc ? segSliceFunc(span) : this.spanToSegs(span);
+		var i, seg;
 
 		for (i = 0; i < segs.length; i++) {
-			this.transformEventSeg(segs[i], range, event);
-			out.push(segs[i]);
+			seg = segs[i];
+			seg.event = event;
+			seg.eventStartMS = +span.start; // TODO: not the best name after making spans unzoned
+			seg.eventDurationMS = span.end - span.start;
 		}
-	},
 
-
-	// Given a range (unzoned start/end) that is about to become a span,
-	// attach any event-derived properties to it.
-	transformEventSpan: function(range, event) {
-		// subclasses can implement
-	},
-
-
-	// Given a segment object, attach any extra properties, based off of its source span and event.
-	transformEventSeg: function(seg, span, event) {
-		seg.event = event;
-		seg.eventStartMS = +span.start; // TODO: not the best name after making spans unzoned
-		seg.eventDurationMS = span.end - span.start;
+		return segs;
 	},
 
 
@@ -4478,6 +4540,7 @@ function isBgEvent(event) { // returns true if background OR inverse-background
 	var rendering = getEventRendering(event);
 	return rendering === 'background' || rendering === 'inverse-background';
 }
+FC.isBgEvent = isBgEvent; // export
 
 
 function isInverseBgEvent(event) {
@@ -4856,13 +4919,23 @@ var DayTableMixin = FC.DayTableMixin = {
 	},
 
 
-	renderHeadDateCellHtml: function(date, colspan) {
+	// TODO: when internalApiVersion, accept an object for HTML attributes
+	// (colspan should be no different)
+	renderHeadDateCellHtml: function(date, colspan, otherAttrs) {
 		var view = this.view;
 
 		return '' +
 			'<th class="fc-day-header ' + view.widgetHeaderClass + ' fc-' + dayIDs[date.day()] + '"' +
-				(colspan > 1 ? ' colspan="' + colspan + '"' : '') +
-				'>' +
+				(this.rowCnt == 1 ?
+					' data-date="' + date.format('YYYY-MM-DD') + '"' :
+					'') +
+				(colspan > 1 ?
+					' colspan="' + colspan + '"' :
+					'') +
+				(otherAttrs ?
+					' ' + otherAttrs :
+					'') +
+			'>' +
 				htmlEscape(date.format(this.colHeadFormat)) +
 			'</th>';
 	},
@@ -4900,7 +4973,7 @@ var DayTableMixin = FC.DayTableMixin = {
 	},
 
 
-	renderBgCellHtml: function(date) {
+	renderBgCellHtml: function(date, otherAttrs) {
 		var view = this.view;
 		var classes = this.getDayClasses(date);
 
@@ -4908,6 +4981,9 @@ var DayTableMixin = FC.DayTableMixin = {
 
 		return '<td class="' + classes.join(' ') + '"' +
 			' data-date="' + date.format('YYYY-MM-DD') + '"' + // if date has a time, won't format it
+			(otherAttrs ?
+				' ' + otherAttrs :
+				'') +
 			'></td>';
 	},
 
@@ -4919,6 +4995,11 @@ var DayTableMixin = FC.DayTableMixin = {
 	// Generates the default HTML intro for any row. User classes should override
 	renderIntroHtml: function() {
 	},
+
+
+	// TODO: a generic method for dealing with <tr>, RTL, intro
+	// when increment internalApiVersion
+	// wrapTr (scheduler)
 
 
 	/* Utils
@@ -6073,12 +6154,10 @@ var TimeGrid = FC.TimeGrid = Grid.extend(DayTableMixin, {
 
 	colEls: null, // cells elements in the day-row background
 	slatEls: null, // elements running horizontally across all columns
-	helperEl: null, // cell skeleton element for rendering the mock event "helper"
+	nowIndicatorEls: null,
 
 	colCoordCache: null,
 	slatCoordCache: null,
-
-	businessHourSegs: null,
 
 
 	constructor: function() {
@@ -6103,12 +6182,8 @@ var TimeGrid = FC.TimeGrid = Grid.extend(DayTableMixin, {
 			els: this.slatEls,
 			isVertical: true
 		});
-	},
 
-
-	renderBusinessHours: function() {
-		var events = this.view.calendar.getBusinessHoursEvents();
-		this.businessHourSegs = this.renderFill('businessHours', this.eventsToSegs(events), 'bgevent');
+		this.renderContentSkeleton();
 	},
 
 
@@ -6154,7 +6229,9 @@ var TimeGrid = FC.TimeGrid = Grid.extend(DayTableMixin, {
 				'</td>';
 
 			html +=
-				'<tr ' + (isLabeled ? '' : 'class="fc-minor"') + '>' +
+				'<tr data-time="' + slotDate.format('HH:mm:ss') + '"' +
+					(isLabeled ? '' : ' class="fc-minor"') +
+					'>' +
 					(!isRTL ? axisHtml : '') +
 					'<td class="' + view.widgetContentClass + '"/>' +
 					(isRTL ? axisHtml : '') +
@@ -6367,7 +6444,9 @@ var TimeGrid = FC.TimeGrid = Grid.extend(DayTableMixin, {
 		this.slatCoordCache.build();
 
 		if (isResize) {
-			this.updateSegVerticals();
+			this.updateSegVerticals(
+				[].concat(this.fgSegs || [], this.bgSegs || [], this.businessSegs || [])
+			);
 		}
 	},
 
@@ -6421,7 +6500,10 @@ var TimeGrid = FC.TimeGrid = Grid.extend(DayTableMixin, {
 
 		if (seg) { // if there is event information for this drag, render a helper event
 			this.renderEventLocationHelper(eventLocation, seg);
-			this.applyDragOpacity(this.helperEl);
+
+			for (var i = 0; i < this.helperSegs.length; i++) {
+				this.applyDragOpacity(this.helperSegs[i].el);
+			}
 
 			return true; // signal that a helper has been rendered
 		}
@@ -6461,39 +6543,72 @@ var TimeGrid = FC.TimeGrid = Grid.extend(DayTableMixin, {
 
 	// Renders a mock "helper" event. `sourceSeg` is the original segment object and might be null (an external drag)
 	renderHelper: function(event, sourceSeg) {
-		var segs = this.eventToSegs(event);
-		var tableEl;
-		var i, seg;
-		var sourceEl;
-
-		segs = this.renderFgSegEls(segs); // assigns each seg's el and returns a subset of segs that were rendered
-		tableEl = this.renderSegTable(segs);
-
-		// Try to make the segment that is in the same row as sourceSeg look the same
-		for (i = 0; i < segs.length; i++) {
-			seg = segs[i];
-			if (sourceSeg && sourceSeg.col === seg.col) {
-				sourceEl = sourceSeg.el;
-				seg.el.css({
-					left: sourceEl.css('left'),
-					right: sourceEl.css('right'),
-					'margin-left': sourceEl.css('margin-left'),
-					'margin-right': sourceEl.css('margin-right')
-				});
-			}
-		}
-
-		this.helperEl = $('<div class="fc-helper-skeleton"/>')
-			.append(tableEl)
-				.appendTo(this.el);
+		this.renderHelperSegs(this.eventToSegs(event), sourceSeg);
 	},
 
 
 	// Unrenders any mock helper event
 	unrenderHelper: function() {
-		if (this.helperEl) {
-			this.helperEl.remove();
-			this.helperEl = null;
+		this.unrenderHelperSegs();
+	},
+
+
+	/* Business Hours
+	------------------------------------------------------------------------------------------------------------------*/
+
+
+	renderBusinessHours: function() {
+		var events = this.view.calendar.getBusinessHoursEvents();
+		var segs = this.eventsToSegs(events);
+
+		this.renderBusinessSegs(segs);
+	},
+
+
+	unrenderBusinessHours: function() {
+		this.unrenderBusinessSegs();
+	},
+
+
+	/* Now Indicator
+	------------------------------------------------------------------------------------------------------------------*/
+
+
+	getNowIndicatorUnit: function() {
+		return 'minute'; // will refresh on the minute
+	},
+
+
+	renderNowIndicator: function(date) {
+		// seg system might be overkill, but it handles scenario where line needs to be rendered
+		//  more than once because of columns with the same date (resources columns for example)
+		var segs = this.spanToSegs({ start: date, end: date });
+		var top = this.computeDateTop(date, date);
+		var nodes = [];
+		var i;
+
+		// render lines within the columns
+		for (i = 0; i < segs.length; i++) {
+			nodes.push($('<div class="fc-now-indicator fc-now-indicator-line"></div>')
+				.css('top', top)
+				.appendTo(this.colContainerEls.eq(segs[i].col))[0]);
+		}
+
+		// render an arrow over the axis
+		if (segs.length > 0) { // is the current time in view?
+			nodes.push($('<div class="fc-now-indicator fc-now-indicator-arrow"></div>')
+				.css('top', top)
+				.appendTo(this.el.find('.fc-content-skeleton'))[0]);
+		}
+
+		this.nowIndicatorEls = $(nodes);
+	},
+
+
+	unrenderNowIndicator: function() {
+		if (this.nowIndicatorEls) {
+			this.nowIndicatorEls.remove();
+			this.nowIndicatorEls = null;
 		}
 	},
 
@@ -6522,233 +6637,260 @@ var TimeGrid = FC.TimeGrid = Grid.extend(DayTableMixin, {
 	},
 
 
-	/* Fill System (highlight, background events, business hours)
+	/* Highlight
 	------------------------------------------------------------------------------------------------------------------*/
 
 
-	// Renders a set of rectangles over the given time segments.
-	// Only returns segments that successfully rendered.
-	renderFill: function(type, segs, className) {
-		var segCols;
-		var skeletonEl;
-		var trEl;
-		var col, colSegs;
-		var tdEl;
-		var containerEl;
-		var dayDate;
-		var i, seg;
+	renderHighlight: function(span) {
+		this.renderHighlightSegs(this.spanToSegs(span));
+	},
 
-		if (segs.length) {
 
-			segs = this.renderFillSegEls(type, segs); // assignes `.el` to each seg. returns successfully rendered segs
-			segCols = this.groupSegCols(segs); // group into sub-arrays, and assigns 'col' to each seg
-
-			className = className || type.toLowerCase();
-			skeletonEl = $(
-				'<div class="fc-' + className + '-skeleton">' +
-					'<table><tr/></table>' +
-				'</div>'
-			);
-			trEl = skeletonEl.find('tr');
-
-			for (col = 0; col < segCols.length; col++) {
-				colSegs = segCols[col];
-				tdEl = $('<td/>').appendTo(trEl);
-
-				if (colSegs.length) {
-					containerEl = $('<div class="fc-' + className + '-container"/>').appendTo(tdEl);
-					dayDate = this.getCellDate(0, col); // row=0
-
-					for (i = 0; i < colSegs.length; i++) {
-						seg = colSegs[i];
-						containerEl.append(
-							seg.el.css({
-								top: this.computeDateTop(seg.start, dayDate),
-								bottom: -this.computeDateTop(seg.end, dayDate) // the y position of the bottom edge
-							})
-						);
-					}
-				}
-			}
-
-			this.bookendCells(trEl);
-
-			this.el.append(skeletonEl);
-			this.elsByFill[type] = skeletonEl;
-		}
-
-		return segs;
+	unrenderHighlight: function() {
+		this.unrenderHighlightSegs();
 	}
 
 });
 
 ;;
 
-/* Event-rendering methods for the TimeGrid class
+/* Methods for rendering SEGMENTS, pieces of content that live on the view
+ ( this file is no longer just for events )
 ----------------------------------------------------------------------------------------------------------------------*/
 
 TimeGrid.mixin({
 
-	eventSkeletonEl: null, // has cells with event-containers, which contain absolutely positioned event elements
+	colContainerEls: null, // containers for each column
+
+	// inner-containers for each column where different types of segs live
+	fgContainerEls: null,
+	bgContainerEls: null,
+	helperContainerEls: null,
+	highlightContainerEls: null,
+	businessContainerEls: null,
+
+	// arrays of different types of displayed segments
+	fgSegs: null,
+	bgSegs: null,
+	helperSegs: null,
+	highlightSegs: null,
+	businessSegs: null,
 
 
-	// Renders the given foreground event segments onto the grid
-	renderFgSegs: function(segs) {
-		segs = this.renderFgSegEls(segs); // returns a subset of the segs. segs that were actually rendered
+	// Renders the DOM that the view's content will live in
+	renderContentSkeleton: function() {
+		var cellHtml = '';
+		var i;
+		var skeletonEl;
 
-		this.el.append(
-			this.eventSkeletonEl = $('<div class="fc-content-skeleton"/>')
-				.append(this.renderSegTable(segs))
+		for (i = 0; i < this.colCnt; i++) {
+			cellHtml +=
+				'<td>' +
+					'<div class="fc-content-col">' +
+						'<div class="fc-event-container fc-helper-container"></div>' +
+						'<div class="fc-event-container"></div>' +
+						'<div class="fc-highlight-container"></div>' +
+						'<div class="fc-bgevent-container"></div>' +
+						'<div class="fc-business-container"></div>' +
+					'</div>' +
+				'</td>';
+		}
+
+		skeletonEl = $(
+			'<div class="fc-content-skeleton">' +
+				'<table>' +
+					'<tr>' + cellHtml + '</tr>' +
+				'</table>' +
+			'</div>'
 		);
 
-		return segs; // return only the segs that were actually rendered
+		this.colContainerEls = skeletonEl.find('.fc-content-col');
+		this.helperContainerEls = skeletonEl.find('.fc-helper-container');
+		this.fgContainerEls = skeletonEl.find('.fc-event-container:not(.fc-helper-container)');
+		this.bgContainerEls = skeletonEl.find('.fc-bgevent-container');
+		this.highlightContainerEls = skeletonEl.find('.fc-highlight-container');
+		this.businessContainerEls = skeletonEl.find('.fc-business-container');
+
+		this.bookendCells(skeletonEl.find('tr')); // TODO: do this on string level
+		this.el.append(skeletonEl);
 	},
 
 
-	// Unrenders all currently rendered foreground event segments
-	unrenderFgSegs: function(segs) {
-		if (this.eventSkeletonEl) {
-			this.eventSkeletonEl.remove();
-			this.eventSkeletonEl = null;
-		}
+	/* Foreground Events
+	------------------------------------------------------------------------------------------------------------------*/
+
+
+	renderFgSegs: function(segs) {
+		segs = this.renderFgSegsIntoContainers(segs, this.fgContainerEls);
+		this.fgSegs = segs;
+		return segs; // needed for Grid::renderEvents
 	},
 
 
-	// Renders and returns the <table> portion of the event-skeleton.
-	// Returns an object with properties 'tbodyEl' and 'segs'.
-	renderSegTable: function(segs) {
-		var tableEl = $('<table><tr/></table>');
-		var trEl = tableEl.find('tr');
-		var segCols;
+	unrenderFgSegs: function() {
+		this.unrenderNamedSegs('fgSegs');
+	},
+
+
+	/* Foreground Helper Events
+	------------------------------------------------------------------------------------------------------------------*/
+
+
+	renderHelperSegs: function(segs, sourceSeg) {
 		var i, seg;
-		var col, colSegs;
-		var containerEl;
+		var sourceEl;
 
-		segCols = this.groupSegCols(segs); // group into sub-arrays, and assigns 'col' to each seg
+		segs = this.renderFgSegsIntoContainers(segs, this.helperContainerEls);
 
-		this.computeSegVerticals(segs); // compute and assign top/bottom
-
-		for (col = 0; col < segCols.length; col++) { // iterate each column grouping
-			colSegs = segCols[col];
-			this.placeSlotSegs(colSegs); // compute horizontal coordinates, z-index's, and reorder the array
-
-			containerEl = $('<div class="fc-event-container"/>');
-
-			// assign positioning CSS and insert into container
-			for (i = 0; i < colSegs.length; i++) {
-				seg = colSegs[i];
-				seg.el.css(this.generateSegPositionCss(seg));
-
-				// if the height is short, add a className for alternate styling
-				if (seg.bottom - seg.top < 30) {
-					seg.el.addClass('fc-short');
-				}
-
-				containerEl.append(seg.el);
-			}
-
-			trEl.append($('<td/>').append(containerEl));
-		}
-
-		this.bookendCells(trEl);
-
-		return tableEl;
-	},
-
-
-	// Given an array of segments that are all in the same column, sets the backwardCoord and forwardCoord on each.
-	// NOTE: Also reorders the given array by date!
-	placeSlotSegs: function(segs) {
-		var levels;
-		var level0;
-		var i;
-
-		this.sortEventSegs(segs); // order by certain criteria
-		levels = buildSlotSegLevels(segs);
-		computeForwardSlotSegs(levels);
-
-		if ((level0 = levels[0])) {
-
-			for (i = 0; i < level0.length; i++) {
-				computeSlotSegPressures(level0[i]);
-			}
-
-			for (i = 0; i < level0.length; i++) {
-				this.computeSlotSegCoords(level0[i], 0, 0);
-			}
-		}
-	},
-
-
-	// Calculate seg.forwardCoord and seg.backwardCoord for the segment, where both values range
-	// from 0 to 1. If the calendar is left-to-right, the seg.backwardCoord maps to "left" and
-	// seg.forwardCoord maps to "right" (via percentage). Vice-versa if the calendar is right-to-left.
-	//
-	// The segment might be part of a "series", which means consecutive segments with the same pressure
-	// who's width is unknown until an edge has been hit. `seriesBackwardPressure` is the number of
-	// segments behind this one in the current series, and `seriesBackwardCoord` is the starting
-	// coordinate of the first segment in the series.
-	computeSlotSegCoords: function(seg, seriesBackwardPressure, seriesBackwardCoord) {
-		var forwardSegs = seg.forwardSegs;
-		var i;
-
-		if (seg.forwardCoord === undefined) { // not already computed
-
-			if (!forwardSegs.length) {
-
-				// if there are no forward segments, this segment should butt up against the edge
-				seg.forwardCoord = 1;
-			}
-			else {
-
-				// sort highest pressure first
-				this.sortForwardSlotSegs(forwardSegs);
-
-				// this segment's forwardCoord will be calculated from the backwardCoord of the
-				// highest-pressure forward segment.
-				this.computeSlotSegCoords(forwardSegs[0], seriesBackwardPressure + 1, seriesBackwardCoord);
-				seg.forwardCoord = forwardSegs[0].backwardCoord;
-			}
-
-			// calculate the backwardCoord from the forwardCoord. consider the series
-			seg.backwardCoord = seg.forwardCoord -
-				(seg.forwardCoord - seriesBackwardCoord) / // available width for series
-				(seriesBackwardPressure + 1); // # of segments in the series
-
-			// use this segment's coordinates to computed the coordinates of the less-pressurized
-			// forward segments
-			for (i=0; i<forwardSegs.length; i++) {
-				this.computeSlotSegCoords(forwardSegs[i], 0, seg.forwardCoord);
-			}
-		}
-	},
-
-
-	// Refreshes the CSS top/bottom coordinates for each segment element. Probably after a window resize/zoom.
-	// Repositions business hours segs too, so not just for events. Maybe shouldn't be here.
-	updateSegVerticals: function() {
-		var allSegs = (this.segs || []).concat(this.businessHourSegs || []);
-		var i;
-
-		this.computeSegVerticals(allSegs);
-
-		for (i = 0; i < allSegs.length; i++) {
-			allSegs[i].el.css(
-				this.generateSegVerticalCss(allSegs[i])
-			);
-		}
-	},
-
-
-	// For each segment in an array, computes and assigns its top and bottom properties
-	computeSegVerticals: function(segs) {
-		var i, seg;
-
+		// Try to make the segment that is in the same row as sourceSeg look the same
 		for (i = 0; i < segs.length; i++) {
 			seg = segs[i];
-			seg.top = this.computeDateTop(seg.start, seg.start);
-			seg.bottom = this.computeDateTop(seg.end, seg.start);
+			if (sourceSeg && sourceSeg.col === seg.col) {
+				sourceEl = sourceSeg.el;
+				seg.el.css({
+					left: sourceEl.css('left'),
+					right: sourceEl.css('right'),
+					'margin-left': sourceEl.css('margin-left'),
+					'margin-right': sourceEl.css('margin-right')
+				});
+			}
 		}
+
+		this.helperSegs = segs;
+	},
+
+
+	unrenderHelperSegs: function() {
+		this.unrenderNamedSegs('helperSegs');
+	},
+
+
+	/* Background Events
+	------------------------------------------------------------------------------------------------------------------*/
+
+
+	renderBgSegs: function(segs) {
+		segs = this.renderFillSegEls('bgEvent', segs); // TODO: old fill system
+		this.updateSegVerticals(segs);
+		this.attachSegsByCol(this.groupSegsByCol(segs), this.bgContainerEls);
+		this.bgSegs = segs;
+		return segs; // needed for Grid::renderEvents
+	},
+
+
+	unrenderBgSegs: function() {
+		this.unrenderNamedSegs('bgSegs');
+	},
+
+
+	/* Highlight
+	------------------------------------------------------------------------------------------------------------------*/
+
+
+	renderHighlightSegs: function(segs) {
+		segs = this.renderFillSegEls('highlight', segs); // TODO: old fill system
+		this.updateSegVerticals(segs);
+		this.attachSegsByCol(this.groupSegsByCol(segs), this.highlightContainerEls);
+		this.highlightSegs = segs;
+	},
+
+
+	unrenderHighlightSegs: function() {
+		this.unrenderNamedSegs('highlightSegs');
+	},
+
+
+	/* Business Hours
+	------------------------------------------------------------------------------------------------------------------*/
+
+
+	renderBusinessSegs: function(segs) {
+		segs = this.renderFillSegEls('businessHours', segs); // TODO: old fill system
+		this.updateSegVerticals(segs);
+		this.attachSegsByCol(this.groupSegsByCol(segs), this.businessContainerEls);
+		this.businessSegs = segs;
+	},
+
+
+	unrenderBusinessSegs: function() {
+		this.unrenderNamedSegs('businessSegs');
+	},
+
+
+	/* Seg Rendering Utils
+	------------------------------------------------------------------------------------------------------------------*/
+
+
+	// Given a flat array of segments, return an array of sub-arrays, grouped by each segment's col
+	groupSegsByCol: function(segs) {
+		var segsByCol = [];
+		var i;
+
+		for (i = 0; i < this.colCnt; i++) {
+			segsByCol.push([]);
+		}
+
+		for (i = 0; i < segs.length; i++) {
+			segsByCol[segs[i].col].push(segs[i]);
+		}
+
+		return segsByCol;
+	},
+
+
+	// Given segments grouped by column, insert the segments' elements into a parallel array of container
+	// elements, each living within a column.
+	attachSegsByCol: function(segsByCol, containerEls) {
+		var col;
+		var segs;
+		var i;
+
+		for (col = 0; col < this.colCnt; col++) { // iterate each column grouping
+			segs = segsByCol[col];
+
+			for (i = 0; i < segs.length; i++) {
+				containerEls.eq(col).append(segs[i].el);
+			}
+		}
+	},
+
+
+	// Given the name of a property of `this` object, assumed to be an array of segments,
+	// loops through each segment and removes from DOM. Will null-out the property afterwards.
+	unrenderNamedSegs: function(propName) {
+		var segs = this[propName];
+		var i;
+
+		if (segs) {
+			for (i = 0; i < segs.length; i++) {
+				segs[i].el.remove();
+			}
+			this[propName] = null;
+		}
+	},
+
+
+
+	/* Foreground Event Rendering Utils
+	------------------------------------------------------------------------------------------------------------------*/
+
+
+	// Given an array of foreground segments, render a DOM element for each, computes position,
+	// and attaches to the column inner-container elements.
+	renderFgSegsIntoContainers: function(segs, containerEls) {
+		var segsByCol;
+		var col;
+
+		segs = this.renderFgSegEls(segs); // will call fgSegHtml
+		segsByCol = this.groupSegsByCol(segs);
+
+		for (col = 0; col < this.colCnt; col++) {
+			this.updateFgSegCoords(segsByCol[col]);
+		}
+
+		this.attachSegsByCol(segsByCol, containerEls);
+
+		return segs;
 	},
 
 
@@ -6825,9 +6967,169 @@ TimeGrid.mixin({
 	},
 
 
+	/* Seg Position Utils
+	------------------------------------------------------------------------------------------------------------------*/
+
+
+	// Refreshes the CSS top/bottom coordinates for each segment element.
+	// Works when called after initial render, after a window resize/zoom for example.
+	updateSegVerticals: function(segs) {
+		this.computeSegVerticals(segs);
+		this.assignSegVerticals(segs);
+	},
+
+
+	// For each segment in an array, computes and assigns its top and bottom properties
+	computeSegVerticals: function(segs) {
+		var i, seg;
+
+		for (i = 0; i < segs.length; i++) {
+			seg = segs[i];
+			seg.top = this.computeDateTop(seg.start, seg.start);
+			seg.bottom = this.computeDateTop(seg.end, seg.start);
+		}
+	},
+
+
+	// Given segments that already have their top/bottom properties computed, applies those values to
+	// the segments' elements.
+	assignSegVerticals: function(segs) {
+		var i, seg;
+
+		for (i = 0; i < segs.length; i++) {
+			seg = segs[i];
+			seg.el.css(this.generateSegVerticalCss(seg));
+		}
+	},
+
+
+	// Generates an object with CSS properties for the top/bottom coordinates of a segment element
+	generateSegVerticalCss: function(seg) {
+		return {
+			top: seg.top,
+			bottom: -seg.bottom // flipped because needs to be space beyond bottom edge of event container
+		};
+	},
+
+
+	/* Foreground Event Positioning Utils
+	------------------------------------------------------------------------------------------------------------------*/
+
+
+	// Given segments that are assumed to all live in the *same column*,
+	// compute their verical/horizontal coordinates and assign to their elements.
+	updateFgSegCoords: function(segs) {
+		this.computeSegVerticals(segs); // horizontals relies on this
+		this.computeFgSegHorizontals(segs); // compute horizontal coordinates, z-index's, and reorder the array
+		this.assignSegVerticals(segs);
+		this.assignFgSegHorizontals(segs);
+	},
+
+
+	// Given an array of segments that are all in the same column, sets the backwardCoord and forwardCoord on each.
+	// NOTE: Also reorders the given array by date!
+	computeFgSegHorizontals: function(segs) {
+		var levels;
+		var level0;
+		var i;
+
+		this.sortEventSegs(segs); // order by certain criteria
+		levels = buildSlotSegLevels(segs);
+		computeForwardSlotSegs(levels);
+
+		if ((level0 = levels[0])) {
+
+			for (i = 0; i < level0.length; i++) {
+				computeSlotSegPressures(level0[i]);
+			}
+
+			for (i = 0; i < level0.length; i++) {
+				this.computeFgSegForwardBack(level0[i], 0, 0);
+			}
+		}
+	},
+
+
+	// Calculate seg.forwardCoord and seg.backwardCoord for the segment, where both values range
+	// from 0 to 1. If the calendar is left-to-right, the seg.backwardCoord maps to "left" and
+	// seg.forwardCoord maps to "right" (via percentage). Vice-versa if the calendar is right-to-left.
+	//
+	// The segment might be part of a "series", which means consecutive segments with the same pressure
+	// who's width is unknown until an edge has been hit. `seriesBackwardPressure` is the number of
+	// segments behind this one in the current series, and `seriesBackwardCoord` is the starting
+	// coordinate of the first segment in the series.
+	computeFgSegForwardBack: function(seg, seriesBackwardPressure, seriesBackwardCoord) {
+		var forwardSegs = seg.forwardSegs;
+		var i;
+
+		if (seg.forwardCoord === undefined) { // not already computed
+
+			if (!forwardSegs.length) {
+
+				// if there are no forward segments, this segment should butt up against the edge
+				seg.forwardCoord = 1;
+			}
+			else {
+
+				// sort highest pressure first
+				this.sortForwardSegs(forwardSegs);
+
+				// this segment's forwardCoord will be calculated from the backwardCoord of the
+				// highest-pressure forward segment.
+				this.computeFgSegForwardBack(forwardSegs[0], seriesBackwardPressure + 1, seriesBackwardCoord);
+				seg.forwardCoord = forwardSegs[0].backwardCoord;
+			}
+
+			// calculate the backwardCoord from the forwardCoord. consider the series
+			seg.backwardCoord = seg.forwardCoord -
+				(seg.forwardCoord - seriesBackwardCoord) / // available width for series
+				(seriesBackwardPressure + 1); // # of segments in the series
+
+			// use this segment's coordinates to computed the coordinates of the less-pressurized
+			// forward segments
+			for (i=0; i<forwardSegs.length; i++) {
+				this.computeFgSegForwardBack(forwardSegs[i], 0, seg.forwardCoord);
+			}
+		}
+	},
+
+
+	sortForwardSegs: function(forwardSegs) {
+		forwardSegs.sort(proxy(this, 'compareForwardSegs'));
+	},
+
+
+	// A cmp function for determining which forward segment to rely on more when computing coordinates.
+	compareForwardSegs: function(seg1, seg2) {
+		// put higher-pressure first
+		return seg2.forwardPressure - seg1.forwardPressure ||
+			// put segments that are closer to initial edge first (and favor ones with no coords yet)
+			(seg1.backwardCoord || 0) - (seg2.backwardCoord || 0) ||
+			// do normal sorting...
+			this.compareEventSegs(seg1, seg2);
+	},
+
+
+	// Given foreground event segments that have already had their position coordinates computed,
+	// assigns position-related CSS values to their elements.
+	assignFgSegHorizontals: function(segs) {
+		var i, seg;
+
+		for (i = 0; i < segs.length; i++) {
+			seg = segs[i];
+			seg.el.css(this.generateFgSegHorizontalCss(seg));
+
+			// if the height is short, add a className for alternate styling
+			if (seg.bottom - seg.top < 30) {
+				seg.el.addClass('fc-short');
+			}
+		}
+	},
+
+
 	// Generates an object with CSS properties/values that should be applied to an event segment element.
 	// Contains important positioning-related properties that should be applied to any event element, customized or not.
-	generateSegPositionCss: function(seg) {
+	generateFgSegHorizontalCss: function(seg) {
 		var shouldOverlap = this.view.opt('slotEventOverlap');
 		var backwardCoord = seg.backwardCoord; // the left side if LTR. the right side if RTL. floating-point
 		var forwardCoord = seg.forwardCoord; // the right side if LTR. the left side if RTL. floating-point
@@ -6859,48 +7161,6 @@ TimeGrid.mixin({
 		}
 
 		return props;
-	},
-
-
-	// Generates an object with CSS properties for the top/bottom coordinates of a segment element
-	generateSegVerticalCss: function(seg) {
-		return {
-			top: seg.top,
-			bottom: -seg.bottom // flipped because needs to be space beyond bottom edge of event container
-		};
-	},
-
-
-	// Given a flat array of segments, return an array of sub-arrays, grouped by each segment's col
-	groupSegCols: function(segs) {
-		var segCols = [];
-		var i;
-
-		for (i = 0; i < this.colCnt; i++) {
-			segCols.push([]);
-		}
-
-		for (i = 0; i < segs.length; i++) {
-			segCols[segs[i].col].push(segs[i]);
-		}
-
-		return segCols;
-	},
-
-
-	sortForwardSlotSegs: function(forwardSegs) {
-		forwardSegs.sort(proxy(this, 'compareForwardSlotSegs'));
-	},
-
-
-	// A cmp function for determining which forward segment to rely on more when computing coordinates.
-	compareForwardSlotSegs: function(seg1, seg2) {
-		// put higher-pressure first
-		return seg2.forwardPressure - seg1.forwardPressure ||
-			// put segments that are closer to initial edge first (and favor ones with no coords yet)
-			(seg1.backwardCoord || 0) - (seg2.backwardCoord || 0) ||
-			// do normal sorting...
-			this.compareEventSegs(seg1, seg2);
 	}
 
 });
@@ -7052,6 +7312,10 @@ var View = FC.View = Class.extend({
 
 	// document handlers, bound to `this` object
 	documentMousedownProxy: null, // TODO: doesn't work with touch
+
+	// for refresh timing of now indicator
+	nowIndicatorTimeoutID: null,
+	nowIndicatorIntervalID: null,
 
 
 	constructor: function(calendar, type, options, intervalDuration) {
@@ -7331,7 +7595,7 @@ var View = FC.View = Class.extend({
 			this.clearView();
 			this.displayView();
 			if (wasEventsRendered) { // only render and trigger handlers if events previously rendered
-				this.displayEvents();
+				this.displayEvents(this.calendar.getEventCache());
 			}
 		}
 	},
@@ -7354,6 +7618,10 @@ var View = FC.View = Class.extend({
 		this.renderDates();
 		this.updateSize();
 		this.renderBusinessHours(); // might need coordinates, so should go after updateSize()
+
+		if (this.opt('nowIndicator')) {
+			this.startNowIndicator();
+		}
 	},
 
 
@@ -7361,6 +7629,7 @@ var View = FC.View = Class.extend({
 	// Can be asynchronous and return a promise.
 	clearView: function() {
 		this.unselect();
+		this.stopNowIndicator();
 		this.triggerUnrender();
 		this.unrenderBusinessHours();
 		this.unrenderDates();
@@ -7395,18 +7664,6 @@ var View = FC.View = Class.extend({
 	},
 
 
-	// Renders business-hours onto the view. Assumes updateSize has already been called.
-	renderBusinessHours: function() {
-		// subclasses should implement
-	},
-
-
-	// Unrenders previously-rendered business-hours
-	unrenderBusinessHours: function() {
-		// subclasses should implement
-	},
-
-
 	// Signals that the view's content has been rendered
 	triggerRender: function() {
 		this.trigger('viewRender', this, this, this.el);
@@ -7438,6 +7695,102 @@ var View = FC.View = Class.extend({
 		this.widgetHeaderClass = tm + '-widget-header';
 		this.widgetContentClass = tm + '-widget-content';
 		this.highlightStateClass = tm + '-state-highlight';
+	},
+
+
+	/* Business Hours
+	------------------------------------------------------------------------------------------------------------------*/
+
+
+	// Renders business-hours onto the view. Assumes updateSize has already been called.
+	renderBusinessHours: function() {
+		// subclasses should implement
+	},
+
+
+	// Unrenders previously-rendered business-hours
+	unrenderBusinessHours: function() {
+		// subclasses should implement
+	},
+
+
+	/* Now Indicator
+	------------------------------------------------------------------------------------------------------------------*/
+
+
+	// Immediately render the current time indicator and begins re-rendering it at an interval,
+	// which is defined by this.getNowIndicatorUnit().
+	// TODO: somehow do this for the current whole day's background too
+	startNowIndicator: function() {
+		var _this = this;
+		var unit = this.getNowIndicatorUnit();
+		var initialNow; // result first getNow call
+		var initialNowQueried; // ms time of then getNow was called
+		var delay; // ms wait value
+
+		// rerenders the now indicator, computing the new current time from the amount of time that has passed
+		// since the initial getNow call.
+		function update() {
+			_this.unrenderNowIndicator();
+			_this.renderNowIndicator(
+				initialNow.clone().add(new Date() - initialNowQueried) // add ms
+			);
+		}
+
+		if (unit) {
+			initialNow = this.calendar.getNow();
+			initialNowQueried = +new Date();
+			this.renderNowIndicator(initialNow);
+
+			// wait until the beginning of the next interval
+			delay = initialNow.clone().startOf(unit).add(1, unit) - initialNow;
+			this.nowIndicatorTimeoutID = setTimeout(function() {
+				this.nowIndicatorTimeoutID = null;
+				update();
+				delay = +moment.duration(1, unit);
+				delay = Math.max(100, delay); // prevent too frequent
+				this.nowIndicatorIntervalID = setInterval(update, delay); // update every interval
+			}, delay);
+		}
+	},
+
+
+	// Immediately unrenders the view's current time indicator and stops any re-rendering timers.
+	// Won't cause side effects if indicator isn't rendered.
+	stopNowIndicator: function() {
+		var cleared = false;
+
+		if (this.nowIndicatorTimeoutID) {
+			clearTimeout(this.nowIndicatorTimeoutID);
+			cleared = true;
+		}
+		if (this.nowIndicatorIntervalID) {
+			clearTimeout(this.nowIndicatorIntervalID);
+			cleared = true;
+		}
+
+		if (cleared) { // is the indicator currently display?
+			this.unrenderNowIndicator();
+		}
+	},
+
+
+	// Returns a string unit, like 'second' or 'minute' that defined how often the current time indicator
+	// should be refreshed. If something falsy is returned, no time indicator is rendered at all.
+	getNowIndicatorUnit: function() {
+		// subclasses should implement
+	},
+
+
+	// Renders a current time indicator at the given datetime
+	renderNowIndicator: function(date) {
+		// subclasses should implement
+	},
+
+
+	// Undoes the rendering actions from renderNowIndicator
+	unrenderNowIndicator: function() {
+		// subclasses should implement
 	},
 
 
@@ -7563,12 +7916,19 @@ var View = FC.View = Class.extend({
 
 	// Does everything necessary to clear the view's currently-rendered events
 	clearEvents: function() {
+		var scrollState;
+
 		if (this.isEventsRendered) {
+
+			// TODO: optimize: if we know this is part of a displayEvents call, don't queryScroll/setScroll
+			scrollState = this.queryScroll();
+
 			this.triggerEventUnrender();
 			if (this.destroyEvents) {
 				this.destroyEvents(); // TODO: deprecate
 			}
 			this.unrenderEvents();
+			this.setScroll(scrollState);
 			this.isEventsRendered = false;
 		}
 	},
@@ -8941,6 +9301,8 @@ Calendar.defaults = {
 	weekNumberCalculation: 'local',
 	
 	//editable: false,
+
+	//nowIndicator: false,
 
 	scrollTime: '06:00:00',
 	
@@ -11106,15 +11468,6 @@ var AgendaView = FC.AgendaView = View.extend({
 	},
 
 
-	renderBusinessHours: function() {
-		this.timeGrid.renderBusinessHours();
-
-		if (this.dayGrid) {
-			this.dayGrid.renderBusinessHours();
-		}
-	},
-
-
 	// Builds the HTML skeleton for the view.
 	// The day-grid and time-grid components will render inside containers defined by this HTML.
 	renderSkeletonHtml: function() {
@@ -11149,6 +11502,47 @@ var AgendaView = FC.AgendaView = View.extend({
 			 return 'style="width:' + this.axisWidth + 'px"';
 		}
 		return '';
+	},
+
+
+	/* Business Hours
+	------------------------------------------------------------------------------------------------------------------*/
+
+
+	renderBusinessHours: function() {
+		this.timeGrid.renderBusinessHours();
+
+		if (this.dayGrid) {
+			this.dayGrid.renderBusinessHours();
+		}
+	},
+
+
+	unrenderBusinessHours: function() {
+		this.timeGrid.unrenderBusinessHours();
+
+		if (this.dayGrid) {
+			this.dayGrid.unrenderBusinessHours();
+		}
+	},
+
+
+	/* Now Indicator
+	------------------------------------------------------------------------------------------------------------------*/
+
+
+	getNowIndicatorUnit: function() {
+		return this.timeGrid.getNowIndicatorUnit();
+	},
+
+
+	renderNowIndicator: function(date) {
+		this.timeGrid.renderNowIndicator(date);
+	},
+
+
+	unrenderNowIndicator: function() {
+		this.timeGrid.unrenderNowIndicator();
 	},
 
 
@@ -11387,6 +11781,7 @@ var AgendaView = FC.AgendaView = View.extend({
 
 
 // Methods that will customize the rendering behavior of the AgendaView's timeGrid
+// TODO: move into TimeGrid
 var agendaTimeGridMethods = {
 
 
