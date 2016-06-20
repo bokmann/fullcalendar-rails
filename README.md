@@ -6,7 +6,7 @@ This gem for Ruby on Rails adds the content of the jQuery FullCalendar plugin fr
 In order to install the fullcalendar-rails gem and get FullCalendar working within your application, do the following steps:
 
 1. Add to `gemfile`
-    ```
+    ```ruby
     gem 'fullcalendar-rails'
     gem 'momentjs-rails'
     ```
@@ -14,7 +14,7 @@ In order to install the fullcalendar-rails gem and get FullCalendar working with
 1. Bundle install and restart rails server.
 
 1. Add to `application.js`
-    ``` jQuery
+    ```jquery
     //= require moment 
     //= require fullcalendar
     
@@ -22,7 +22,7 @@ In order to install the fullcalendar-rails gem and get FullCalendar working with
     ```
 
 1. Add to `application.css`
-    ``` 
+    ```css
     *= require fullcalendar
     ```
     
@@ -41,26 +41,34 @@ FullCalendar comes with Google calendar support, which can be implemented within
 * Using `gem fullcalendar-rails < 2.1.1`, add `//= require gcal` to `application.js`
 
 ### Installing a specific version:
-If you want a specific version of the fullcelndar-rails gem installed, use the following line in your Gemfile:
+If you want a specific version of FullCalendar, use the following line in your Gemfile:
 
     gem 'fullcalendar-rails', '~> X.Y.Z.0'
     
-where X.Y.Z is the specific version of the fullcalendar-rails gem you want (**Note: this will specify a version of the gem, not a version of FullCalendar itself**).
+where **X.Y.Z** is the specific version of FullCalendar you wish to install (**Note: the last number "0" in the line above indicates the version of the fullcalendar-rails gem and may be something other than "0", but will still provide the FullCalendar version specified by X.Y.Z**).
 
 ### Install for fullcalendar-print
 After following the above instalations steps, you may choose to use the `fullcalendar-print` file within your application to better customize the appearance of FullCalandar. To do so, follow these steps:
 
-1. Create `application-print.css.scss` and add to it
++ Option 1: Add to `application.css`
+    ```css
+    *= require fullcalendar.print
+    ```
+    *Note: This method causes issues with changing the color of events within FullCalendar, pointed out in issue #11.*
+    
++ Option 2:
+  1. Create `application-print.css.scss`.
+  2. Add to `application-print.css.scss`
     ```
     @import 'fullcalendar.print';
     ```
     
-2. Add to `config/application.rb`
+  3. Add to `config/application.rb`
     ```
     config.assets.precompile += ['application-print.css']
     ```
-
-3. Add to `layouts`
+    
+  4. Add to `layouts`
     ```ruby
     <%= stylesheet_link_tag "application-print", :media => "print" %>
     ```
