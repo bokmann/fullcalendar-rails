@@ -75,7 +75,7 @@ After following the above instalations steps, you may choose to use the `fullcal
 
 ## Using FullCalendar
 A step by step tutorial for creating events for FullCalendar in rails may be followed here:
-http://blog.crowdint.com/2014/02/18/fancy-calendars-for-your-web-application-with-fullcalendar.html
+https://web.archive.org/web/20160531044930/http://blog.crowdint.com/2014/02/18/fancy-calendars-for-your-web-application-with-fullcalendar.html
 
 And general documentation for FullCalendar may be found here:
 http://fullcalendar.io/docs/
