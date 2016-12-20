@@ -34,7 +34,7 @@ In order to install the fullcalendar-rails gem and get FullCalendar working with
 
 1. Reference the Using FullCalendar section for details on populating FullCalendar.
 
-### Installing Google Calander support
+### Installing Google Calendar support
 FullCalendar comes with Google calendar support, which can be implemented within your application with the following step:
 
 * Using `gem fullcalendar-rails >= 2.1.1`, add `//= require fullcalendar/gcal` to `application.js`
@@ -48,7 +48,7 @@ If you want a specific version of FullCalendar, use the following line in your G
 where **X.Y.Z** is the specific version of FullCalendar you wish to install (**Note: the last number "0" in the line above indicates the version of the fullcalendar-rails gem and may be something other than "0", but will still provide the FullCalendar version specified by X.Y.Z**).
 
 ### Install for fullcalendar-print
-After following the above instalations steps, you may choose to use the `fullcalendar-print` file within your application to better customize the appearance of FullCalandar. To do so, follow these steps:
+After following the above instalations steps, you may choose to use the `fullcalendar-print` file within your application to better customize the appearance of FullCalendar. To do so, follow these steps:
 
 + Option 1: Add to `application.css`
     ```css
