@@ -1,5 +1,5 @@
 /*!
- * FullCalendar v3.2.0 Stylesheet
+ * FullCalendar v3.3.1 Stylesheet
  * Docs & License: https://fullcalendar.io/
  * (c) 2017 Adam Shaw
  */
@@ -66,6 +66,15 @@ body .fc { /* extra precedence to overcome jqui */
 .fc-nonbusiness { /* default look for non-business-hours areas */
 	/* will inherit .fc-bgevent's styles */
 	background: #d7d7d7;
+}
+
+.fc-unthemed .fc-disabled-day {
+	background: #d7d7d7;
+	opacity: .3;
+}
+
+.ui-widget .fc-disabled-day { /* themed */
+	background-image: none;
 }
 
 
