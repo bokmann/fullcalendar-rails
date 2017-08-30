@@ -74,11 +74,49 @@ After following the above instalations steps, you may choose to use the `fullcal
     ```
 
 ## Using FullCalendar
-A step by step tutorial for creating events for FullCalendar in rails may be followed here:
+A quite aged step by step tutorial for creating events for FullCalendar in rails may be followed here:
 https://web.archive.org/web/20160531044930/http://blog.crowdint.com/2014/02/18/fancy-calendars-for-your-web-application-with-fullcalendar.html
+The instructions in the documentation doesn't work as expected at one point:
+```
+$('#calendar').fullCalendar(
+    events: '/events.json'
+);
+```
+
+Does not work. Instead, wrapping the events parameter in an object like this does:
+
+```
+$('#calendar').fullCalendar({
+    events: '/events.json'
+});
+``` 
+Thanks @sgelliott for pointing this out in issue #71!
+
+*Newer step-by-step instructions needed! If you have newer explanations or want to write one, please open a pull request or an issue.*
 
 And general documentation for FullCalendar may be found here:
 http://fullcalendar.io/docs/
+
+### Usage together with TurboLinks (version 5)
+
+Using turbolinks requires special care for loading and unloading FullCalendar. You have to load your calendars in a good manner, with Turbolinks 5 you need to remove Fullcalendar from a before_cache tag.
+
+Example:
+```
+function eventCalendar() {
+  return $('#event_calendar').fullCalendar({ ***your FullCalendar config***});
+};
+function clearCalendar() {
+  $('#event_calendar').fullCalendar('delete'); // In case delete doesn't work.
+  $('#event_calendar').html('');
+};
+$(document).on('turbolinks:load', eventCalendar);
+$(document).on('turbolinks:before-cache', clearCalendar)
+```
+Link to Turbolinks regarding idempotent scripts:
+https://github.com/turbolinks/turbolinks#making-transformations-idempotent
+
+Thanks @davidwessman for hinting this in issue #78!
 
 ## Motivations
 
