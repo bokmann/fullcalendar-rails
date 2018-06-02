@@ -17,6 +17,7 @@ In order to install the fullcalendar-rails gem and get FullCalendar working with
     ```jquery
     //= require moment 
     //= require fullcalendar
+    //= require fullcalendar/locale-all
     
     $('#calendar').fullCalendar({});
     ```
