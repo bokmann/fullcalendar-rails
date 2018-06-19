@@ -73,6 +73,20 @@ After following the above instalations steps, you may choose to use the `fullcal
     <%= stylesheet_link_tag "application-print", :media => "print" %>
     ```
 
+### Using a different locale (locale-all)
+If you want to change the language of your fullcalendar, add `//= require fullcalendar/locale-all` to `application.js`. 
+
+Now you can specify the locale:
+
+```
+$('#calendar').fullCalendar({
+    locale: 'pt-br',
+})
+```
+
++ Official documentation for locale: https://fullcalendar.io/docs/locale
++ Official live demo: https://fullcalendar.io/docs/locale-demo
+
 ## Using FullCalendar
 A quite aged step by step tutorial for creating events for FullCalendar in rails may be followed here:
 https://web.archive.org/web/20160531044930/http://blog.crowdint.com/2014/02/18/fancy-calendars-for-your-web-application-with-fullcalendar.html
