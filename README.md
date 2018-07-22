@@ -9,7 +9,11 @@ In order to install the fullcalendar-rails gem and get FullCalendar working with
     ```ruby
     gem 'fullcalendar-rails'
     gem 'momentjs-rails'
+    #in Rails >= 5.1 the gem for jquery is not by default in gem file
+    gem 'jquery-rails'
     ```
+  
+
     
 1. Bundle install and restart rails server.
 
