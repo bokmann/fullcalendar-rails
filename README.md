@@ -3,6 +3,22 @@
 This gem for Ruby on Rails adds the content of the jQuery FullCalendar plugin from Adam Shaw (found here http://arshaw.com/fullcalendar/) within your RoR application such that you do not have to download and install all the FullCalendar assets yourself.
 
 ## Installation
+Important Notes: 
+In rails >= 5.1 the gem  
+'jquery-rails'
+is not by default in gem file, so you should add it. 
+If you have already mentiond it or need to use differents versions of jquery, you have to separate them like in this
+```
+<script src="jQuery2.2.3.js"></script>
+<script> jq223 = jQuery.noConflict(false); </script>
+
+jq223("#id").hide();
+ ```
+fonts: 
+https://stackoverflow.com/questions/43020438/fullcalendar-fullcalendar-is-not-a-function
+
+https://stackoverflow.com/questions/528241/how-do-i-run-different-ve%E2%80%8C%E2%80%8Brsions-of-jquery-on-%E2%80%8C%E2%80%8Bthe-same-page
+
 In order to install the fullcalendar-rails gem and get FullCalendar working within your application, do the following steps:
 
 1. Add to `gemfile`
