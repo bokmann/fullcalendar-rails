@@ -21,7 +21,7 @@ In order to install the fullcalendar-rails gem and get FullCalendar working with
     
     $('#calendar').fullCalendar({});
     ```
-The line "//= require fullcalendar/locale-all" is just necessary if you need the calendar in another language than english.
+    The line `//= require fullcalendar/locale-all` is just necessary if you need the calendar in another language than english.
 
 1. Add to `application.css`
     ```css
