@@ -115,6 +115,10 @@ function clearCalendar() {
 $(document).on('turbolinks:load', eventCalendar);
 $(document).on('turbolinks:before-cache', clearCalendar)
 ```
+note: if you are using jquery3 you have to use 
+```
+$('#event_calendar').fullCalendar('destroy'); 
+```
 Link to Turbolinks regarding idempotent scripts:
 https://github.com/turbolinks/turbolinks#making-transformations-idempotent
 
