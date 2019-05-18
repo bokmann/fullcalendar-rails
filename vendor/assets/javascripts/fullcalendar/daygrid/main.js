@@ -1,5 +1,5 @@
 /*!
-FullCalendar Day Grid Plugin v4.0.2
+FullCalendar Day Grid Plugin v4.1.0
 Docs & License: https://fullcalendar.io/
 (c) 2019 Adam Shaw
 */
@@ -908,9 +908,11 @@ Docs & License: https://fullcalendar.io/
         ------------------------------------------------------------------------------------------------------------------*/
         DayGrid.prototype.updateSize = function (isResize) {
             var _a = this, fillRenderer = _a.fillRenderer, eventRenderer = _a.eventRenderer, mirrorRenderer = _a.mirrorRenderer;
-            if (isResize || this.isCellSizesDirty) {
-                this.buildColPositions();
-                this.buildRowPositions();
+            if (isResize ||
+                this.isCellSizesDirty ||
+                this.view.calendar.isEventsUpdated // hack
+            ) {
+                this.buildPositionCaches();
                 this.isCellSizesDirty = false;
             }
             fillRenderer.computeSizes(isResize);
@@ -919,6 +921,10 @@ Docs & License: https://fullcalendar.io/
             fillRenderer.assignSizes(isResize);
             eventRenderer.assignSizes(isResize);
             mirrorRenderer.assignSizes(isResize);
+        };
+        DayGrid.prototype.buildPositionCaches = function () {
+            this.buildColPositions();
+            this.buildRowPositions();
         };
         DayGrid.prototype.buildColPositions = function () {
             this.colPositions.build();
@@ -1068,7 +1074,7 @@ Docs & License: https://fullcalendar.io/
                         moreLink = _this.renderMoreLink(row, col, segsBelow);
                         moreWrap = core.createElement('div', null, moreLink);
                         td.appendChild(moreWrap);
-                        moreNodes.push(moreWrap[0]);
+                        moreNodes.push(moreWrap);
                     }
                     col++;
                 }
@@ -1480,7 +1486,7 @@ Docs & License: https://fullcalendar.io/
         };
         /* Scroll
         ------------------------------------------------------------------------------------------------------------------*/
-        DayGridView.prototype.computeInitialDateScroll = function () {
+        DayGridView.prototype.computeDateScroll = function (timeMs) {
             return { top: 0 };
         };
         DayGridView.prototype.queryDateScroll = function () {
@@ -1512,6 +1518,9 @@ Docs & License: https://fullcalendar.io/
             var dayGrid = this.dayGrid;
             var dateProfile = props.dateProfile, dayTable = props.dayTable;
             dayGrid.receiveProps(__assign({}, this.slicer.sliceProps(props, dateProfile, props.nextDayThreshold, dayGrid, dayTable), { dateProfile: dateProfile, cells: dayTable.cells, isRigid: props.isRigid }));
+        };
+        SimpleDayGrid.prototype.buildPositionCaches = function () {
+            this.dayGrid.buildPositionCaches();
         };
         SimpleDayGrid.prototype.queryHit = function (positionLeft, positionTop) {
             var rawHit = this.dayGrid.positionToHit(positionLeft, positionTop);

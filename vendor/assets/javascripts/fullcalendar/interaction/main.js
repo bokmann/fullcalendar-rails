@@ -1,5 +1,5 @@
 /*!
-FullCalendar Interaction Plugin v4.0.2
+FullCalendar Interaction Plugin v4.1.0
 Docs & License: https://fullcalendar.io/
 (c) 2019 Adam Shaw
 */
@@ -1053,6 +1053,7 @@ Docs & License: https://fullcalendar.io/
         };
         HitDragging.prototype.prepareHits = function () {
             this.offsetTrackers = core.mapHash(this.droppableStore, function (interactionSettings) {
+                interactionSettings.component.buildPositionCaches();
                 return new OffsetTracker(interactionSettings.el);
             });
         };

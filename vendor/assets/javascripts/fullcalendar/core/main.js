@@ -1,5 +1,5 @@
 /*!
-FullCalendar Core Package v4.0.2
+FullCalendar Core Package v4.1.0
 Docs & License: https://fullcalendar.io/
 (c) 2019 Adam Shaw
 */
@@ -4045,6 +4045,8 @@ Docs & License: https://fullcalendar.io/
         */
         // Hit System
         // -----------------------------------------------------------------------------------------------------------------
+        DateComponent.prototype.buildPositionCaches = function () {
+        };
         DateComponent.prototype.queryHit = function (positionLeft, positionTop, elWidth, elHeight) {
             return null; // this should be abstract
         };
@@ -4797,39 +4799,25 @@ Docs & License: https://fullcalendar.io/
     }());
     registerCalendarSystem('gregory', GregorianCalendarSystem);
 
-    var ISO_START = /^\s*\d{4}-\d\d-\d\d([T ]\d)?/;
-    var ISO_TZO_RE = /(?:(Z)|([-+])(\d\d)(?::(\d\d))?)$/;
+    var ISO_RE = /^\s*(\d{4})(-(\d{2})(-(\d{2})([T ](\d{2}):(\d{2})(:(\d{2})(\.(\d+))?)?(Z|(([-+])(\d{2})(:?(\d{2}))?))?)?)?)?$/;
     function parse(str) {
-        var timeZoneOffset = null;
-        var isTimeUnspecified = false;
-        var m = ISO_START.exec(str);
+        var m = ISO_RE.exec(str);
         if (m) {
-            isTimeUnspecified = !m[1];
-            if (isTimeUnspecified) {
-                str += 'T00:00:00Z';
-            }
-            else {
-                str = str.replace(ISO_TZO_RE, function (whole, z, sign, minutes, seconds) {
-                    if (z) {
-                        timeZoneOffset = 0;
-                    }
-                    else {
-                        timeZoneOffset = (parseInt(minutes, 10) * 60 +
-                            parseInt(seconds || 0, 10)) * (sign === '-' ? -1 : 1);
-                    }
-                    return '';
-                }) + 'Z'; // otherwise will parse in local
+            var marker = new Date(Date.UTC(Number(m[1]), m[3] ? Number(m[3]) - 1 : 0, Number(m[5] || 1), Number(m[7] || 0), Number(m[8] || 0), Number(m[10] || 0), m[12] ? Number('0.' + m[12]) * 1000 : 0));
+            if (isValidDate(marker)) {
+                var timeZoneOffset = null;
+                if (m[13]) {
+                    timeZoneOffset = (m[15] === '-' ? -1 : 1) * (Number(m[16] || 0) * 60 +
+                        Number(m[18] || 0));
+                }
+                return {
+                    marker: marker,
+                    isTimeUnspecified: !m[6],
+                    timeZoneOffset: timeZoneOffset
+                };
             }
         }
-        var marker = new Date(str);
-        if (!isValidDate(marker)) {
-            return null;
-        }
-        return {
-            marker: marker,
-            isTimeUnspecified: isTimeUnspecified,
-            timeZoneOffset: timeZoneOffset
-        };
+        return null;
     }
 
     var DateEnv = /** @class */ (function () {
@@ -7142,11 +7130,17 @@ Docs & License: https://fullcalendar.io/
         // Given a duration singular unit, like "week" or "day", finds a matching view spec.
         // Preference is given to views that have corresponding buttons.
         Calendar.prototype.getUnitViewSpec = function (unit) {
-            var viewTypes;
+            var component = this.component;
+            var viewTypes = [];
             var i;
             var spec;
-            // put views that have buttons first. there will be duplicates, but oh well
-            viewTypes = this.component.header.viewsWithButtons; // TODO: include footer as well?
+            // put views that have buttons first. there will be duplicates, but oh
+            if (component.header) {
+                viewTypes.push.apply(viewTypes, component.header.viewsWithButtons);
+            }
+            if (component.footer) {
+                viewTypes.push.apply(viewTypes, component.footer.viewsWithButtons);
+            }
             for (var viewType in this.viewSpecs) {
                 viewTypes.push(viewType);
             }
@@ -7503,6 +7497,14 @@ Docs & License: https://fullcalendar.io/
         Calendar.prototype.refetchEvents = function () {
             this.dispatch({ type: 'FETCH_EVENT_SOURCES' });
         };
+        // Scroll
+        // -----------------------------------------------------------------------------------------------------------------
+        Calendar.prototype.scrollToTime = function (timeInput) {
+            var time = createDuration(timeInput);
+            if (time) {
+                this.component.view.scrollToTime(time);
+            }
+        };
         return Calendar;
     }());
     EmitterMixin.mixInto(Calendar);
@@ -7631,7 +7633,9 @@ Docs & License: https://fullcalendar.io/
         // -----------------------------------------------------------------------------------------------------------------
         View.prototype.renderDatesWrap = function (dateProfile) {
             this.renderDates(dateProfile);
-            this.addScroll({ isDateInit: true });
+            this.addScroll({
+                timeMs: createDuration(this.opt('scrollTime')).milliseconds
+            });
             this.startNowIndicator(dateProfile); // shouldn't render yet because updateSize will be called soon
         };
         View.prototype.unrenderDatesWrap = function () {
@@ -7803,17 +7807,18 @@ Docs & License: https://fullcalendar.io/
             return scroll;
         };
         View.prototype.applyScroll = function (scroll, isResize) {
-            if (scroll.isDateInit) {
-                delete scroll.isDateInit;
+            var timeMs = scroll.timeMs;
+            if (timeMs != null) {
+                delete scroll.timeMs;
                 if (this.props.dateProfile) { // dates rendered yet?
-                    __assign(scroll, this.computeInitialDateScroll());
+                    __assign(scroll, this.computeDateScroll(timeMs));
                 }
             }
             if (this.props.dateProfile) { // dates rendered yet?
                 this.applyDateScroll(scroll);
             }
         };
-        View.prototype.computeInitialDateScroll = function () {
+        View.prototype.computeDateScroll = function (timeMs) {
             return {}; // subclasses must implement
         };
         View.prototype.queryDateScroll = function () {
@@ -7821,6 +7826,12 @@ Docs & License: https://fullcalendar.io/
         };
         View.prototype.applyDateScroll = function (scroll) {
             // subclasses must implement
+        };
+        // for API
+        View.prototype.scrollToTime = function (time) {
+            this.applyScroll({
+                timeMs: time.milliseconds
+            }, false);
         };
         return View;
     }(DateComponent));
@@ -8631,7 +8642,7 @@ Docs & License: https://fullcalendar.io/
 
     // exports
     // --------------------------------------------------------------------------------------------------
-    var version = '4.0.2';
+    var version = '4.1.0';
 
     exports.Calendar = Calendar;
     exports.Component = Component;
