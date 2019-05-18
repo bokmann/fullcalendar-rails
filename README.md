@@ -8,17 +8,15 @@ In order to install the fullcalendar-rails gem and get FullCalendar working with
 1. Add to `gemfile`
     ```ruby
     gem 'fullcalendar-rails'
-    gem 'momentjs-rails'
     ```
-    
+
 1. Bundle install and restart rails server.
 
 1. Add to `application.js`
     ```jquery
-    //= require moment 
     //= require fullcalendar
     //= require fullcalendar/locale-all
-    
+
     $('#calendar').fullCalendar({});
     ```
     The line `//= require fullcalendar/locale-all` is just necessary if you need the calendar in another language than english.
@@ -27,7 +25,7 @@ In order to install the fullcalendar-rails gem and get FullCalendar working with
     ```css
     *= require fullcalendar
     ```
-    
+
 1. In view, include the following html:
     ```html
     <div id="calendar"></div>
@@ -46,7 +44,7 @@ FullCalendar comes with Google calendar support, which can be implemented within
 If you want a specific version of FullCalendar, use the following line in your Gemfile:
 
     gem 'fullcalendar-rails', '~> X.Y.Z.0'
-    
+
 where **X.Y.Z** is the specific version of FullCalendar you wish to install (**Note: the last number "0" in the line above indicates the version of the fullcalendar-rails gem and may be something other than "0", but will still provide the FullCalendar version specified by X.Y.Z**).
 
 ### Install for fullcalendar-print
@@ -57,19 +55,19 @@ After following the above instalations steps, you may choose to use the `fullcal
     *= require fullcalendar.print
     ```
     *Note: This method causes issues with changing the color of events within FullCalendar, pointed out in issue #11.*
-    
+
 + Option 2:
   1. Create `application-print.css.scss`.
   2. Add to `application-print.css.scss`
     ```
     @import 'fullcalendar.print';
     ```
-    
+
   3. Add to `config/application.rb`
     ```
     config.assets.precompile += ['application-print.css']
     ```
-    
+
   4. Add to `layouts`
     ```ruby
     <%= stylesheet_link_tag "application-print", :media => "print" %>
@@ -91,7 +89,7 @@ Does not work. Instead, wrapping the events parameter in an object like this doe
 $('#calendar').fullCalendar({
     events: '/events.json'
 });
-``` 
+```
 Thanks @sgelliott for pointing this out in issue #71!
 
 *Newer step-by-step instructions needed! If you have newer explanations or want to write one, please open a pull request or an issue.*
@@ -124,7 +122,7 @@ Thanks @davidwessman for hinting this in issue #78!
 
 I hate finding random versions of javscript and css out on the web and then just downloading, or copy/pasting into files in my asset pipeline... I like some kind of accountability as to the source of the files, and I especially like it when bundle can tell me when those versioned assets are out of date.  Therefore, I tend to take the few extra minutes to package these things up as versioned gems.
 
-As such, these are primarily for my own use, and may occasionally fall out of date as the project I created them for goes in and out of maintenance cycles.  If thats the case, I will gladly accept pullup requests, or even be willing to talk to someone who wants to take over ownership for the repo and the gem on rubygems.  As with all open source, I hope you find this useful, but if you don't, your right to complain starts with a pullup request.
+As such, these are primarily for my own use, and may occasionally fall out of date as the project I created them for goes in and out of maintenance cycles.  If thats the case, I will gladly accept pull requests, or even be willing to talk to someone who wants to take over ownership for the repo and the gem on rubygems.  As with all open source, I hope you find this useful, but if you don't, your right to complain starts with a pull request.
 
 ## Versioning
 
