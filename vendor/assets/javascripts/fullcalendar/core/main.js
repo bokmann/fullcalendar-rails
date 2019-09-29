@@ -1,5 +1,5 @@
 /*!
-FullCalendar Core Package v4.3.0
+FullCalendar Core Package v4.3.1
 Docs & License: https://fullcalendar.io/
 (c) 2019 Adam Shaw
 */
@@ -8559,7 +8559,7 @@ Docs & License: https://fullcalendar.io/
 
     // exports
     // --------------------------------------------------------------------------------------------------
-    var version = '<%= version %>';
+    var version = '4.3.1';
 
     exports.Calendar = Calendar;
     exports.Component = Component;
