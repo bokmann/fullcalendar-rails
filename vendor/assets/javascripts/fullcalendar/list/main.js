@@ -1,8 +1,9 @@
 /*!
-FullCalendar List View Plugin v4.2.0
+FullCalendar List View Plugin v4.3.0
 Docs & License: https://fullcalendar.io/
 (c) 2019 Adam Shaw
 */
+
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@fullcalendar/core')) :
     typeof define === 'function' && define.amd ? define(['exports', '@fullcalendar/core'], factory) :
@@ -157,6 +158,7 @@ Docs & License: https://fullcalendar.io/
         };
         ListView.prototype.destroy = function () {
             _super.prototype.destroy.call(this);
+            this.renderContent.unrender();
             this.scroller.destroy(); // will remove the Grid too
             this.calendar.unregisterInteractiveComponent(this);
         };

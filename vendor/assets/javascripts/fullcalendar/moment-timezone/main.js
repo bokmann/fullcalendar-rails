@@ -1,15 +1,14 @@
 /*!
-FullCalendar Moment Timezone Plugin v4.2.0
+FullCalendar Moment Timezone Plugin v4.3.0
 Docs & License: https://fullcalendar.io/
 (c) 2019 Adam Shaw
 */
+
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('moment'), require('moment-timezone/builds/moment-timezone-with-data'), require('@fullcalendar/core')) :
     typeof define === 'function' && define.amd ? define(['exports', 'moment', 'moment-timezone/builds/moment-timezone-with-data', '@fullcalendar/core'], factory) :
     (global = global || self, factory(global.FullCalendarMomentTimezone = {}, global.moment, global.moment, global.FullCalendar));
-}(this, function (exports, moment, momentTimezoneWithData, core) { 'use strict';
-
-    moment = moment && moment.hasOwnProperty('default') ? moment['default'] : moment;
+}(this, function (exports, momentNs, momentTimezoneWithData, core) { 'use strict';
 
     /*! *****************************************************************************
     Copyright (c) Microsoft Corporation. All rights reserved.
@@ -40,6 +39,7 @@ Docs & License: https://fullcalendar.io/
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     }
 
+    var moment = momentNs; // the directly callable function
     var MomentNamedTimeZone = /** @class */ (function (_super) {
         __extends(MomentNamedTimeZone, _super);
         function MomentNamedTimeZone() {

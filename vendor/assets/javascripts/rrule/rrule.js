@@ -472,26 +472,202 @@ var IterResult = /** @class */ (function () {
 }());
 /* harmony default export */ var iterresult = (IterResult);
 
-// CONCATENATED MODULE: ./src/callbackiterresult.ts
-var __extends = (undefined && undefined.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
+// CONCATENATED MODULE: ./node_modules/tslib/tslib.es6.js
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the
+License at http://www.apache.org/licenses/LICENSE-2.0
+
+THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+MERCHANTABLITY OR NON-INFRINGEMENT.
+
+See the Apache Version 2.0 License for specific language governing permissions
+and limitations under the License.
+***************************************************************************** */
+/* global Reflect, Promise */
+
+var extendStatics = function(d, b) {
+    extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return extendStatics(d, b);
+};
+
+function __extends(d, b) {
+    extendStatics(d, b);
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+}
+
+var __assign = function() {
+    __assign = Object.assign || function __assign(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+        }
+        return t;
     }
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    return __assign.apply(this, arguments);
+}
+
+function __rest(s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) if (e.indexOf(p[i]) < 0)
+            t[p[i]] = s[p[i]];
+    return t;
+}
+
+function __decorate(decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+}
+
+function __param(paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+}
+
+function __metadata(metadataKey, metadataValue) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
+}
+
+function __awaiter(thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+}
+
+function __generator(thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+}
+
+function __exportStar(m, exports) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
+
+function __values(o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
     };
-})();
+}
+
+function __read(o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+}
+
+function __spread() {
+    for (var ar = [], i = 0; i < arguments.length; i++)
+        ar = ar.concat(__read(arguments[i]));
+    return ar;
+}
+
+function __await(v) {
+    return this instanceof __await ? (this.v = v, this) : new __await(v);
+}
+
+function __asyncGenerator(thisArg, _arguments, generator) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var g = generator.apply(thisArg, _arguments || []), i, q = [];
+    return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i;
+    function verb(n) { if (g[n]) i[n] = function (v) { return new Promise(function (a, b) { q.push([n, v, a, b]) > 1 || resume(n, v); }); }; }
+    function resume(n, v) { try { step(g[n](v)); } catch (e) { settle(q[0][3], e); } }
+    function step(r) { r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r); }
+    function fulfill(value) { resume("next", value); }
+    function reject(value) { resume("throw", value); }
+    function settle(f, v) { if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]); }
+}
+
+function __asyncDelegator(o) {
+    var i, p;
+    return i = {}, verb("next"), verb("throw", function (e) { throw e; }), verb("return"), i[Symbol.iterator] = function () { return this; }, i;
+    function verb(n, f) { i[n] = o[n] ? function (v) { return (p = !p) ? { value: __await(o[n](v)), done: n === "return" } : f ? f(v) : v; } : f; }
+}
+
+function __asyncValues(o) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var m = o[Symbol.asyncIterator], i;
+    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+}
+
+function __makeTemplateObject(cooked, raw) {
+    if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
+    return cooked;
+};
+
+function __importStar(mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result.default = mod;
+    return result;
+}
+
+function __importDefault(mod) {
+    return (mod && mod.__esModule) ? mod : { default: mod };
+}
+
+// CONCATENATED MODULE: ./src/callbackiterresult.ts
+
 
 /**
  * IterResult subclass that calls a callback function on each add,
  * and stops iterating when the callback returns false.
  */
-var CallbackIterResult = /** @class */ (function (_super) {
+var callbackiterresult_CallbackIterResult = /** @class */ (function (_super) {
     __extends(CallbackIterResult, _super);
     function CallbackIterResult(method, args, iterator) {
         var _this = _super.call(this, method, args) || this;
@@ -507,7 +683,7 @@ var CallbackIterResult = /** @class */ (function (_super) {
     };
     return CallbackIterResult;
 }(iterresult));
-/* harmony default export */ var callbackiterresult = (CallbackIterResult);
+/* harmony default export */ var callbackiterresult = (callbackiterresult_CallbackIterResult);
 
 // CONCATENATED MODULE: ./src/types.ts
 var Frequency;
@@ -560,19 +736,7 @@ var Weekday = /** @class */ (function () {
 
 
 // CONCATENATED MODULE: ./src/datetime.ts
-var datetime_extends = (undefined && undefined.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    }
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
+
 
 
 
@@ -603,7 +767,7 @@ var Time = /** @class */ (function () {
 }());
 
 var datetime_DateTime = /** @class */ (function (_super) {
-    datetime_extends(DateTime, _super);
+    __extends(DateTime, _super);
     function DateTime(year, month, day, hour, minute, second, millisecond) {
         var _this = _super.call(this, hour, minute, second, millisecond) || this;
         _this.year = year;
@@ -953,17 +1117,7 @@ function buildTimeset(opts) {
 }
 
 // CONCATENATED MODULE: ./src/parsestring.ts
-var __assign = (undefined && undefined.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
+
 
 
 
@@ -1075,8 +1229,8 @@ function parseWeekday(value) {
             // MO, TU, ...
             return Days[day]; // wday instanceof Weekday
         }
-        // -1MO, +3FR, 1SO, ...
-        var parts = day.match(/^([+-]?\d)([A-Z]{2})$/);
+        // -1MO, +3FR, 1SO, 13TU ...
+        var parts = day.match(/^([+-]?\d{1,2})([A-Z]{2})$/);
         var n = Number(parts[1]);
         var wdaypart = parts[2];
         var wday = Days[wdaypart].weekday;
@@ -1345,17 +1499,7 @@ var WDAYMASK = (function () {
 
 
 // CONCATENATED MODULE: ./src/iterinfo/yearinfo.ts
-var yearinfo_assign = (undefined && undefined.__assign) || function () {
-    yearinfo_assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return yearinfo_assign.apply(this, arguments);
-};
+
 
 
 
@@ -1365,7 +1509,7 @@ function rebuildYear(year, options) {
     var nextyearlen = src_dateutil.isLeapYear(year + 1) ? 366 : 365;
     var yearordinal = src_dateutil.toOrdinal(firstyday);
     var yearweekday = src_dateutil.getWeekday(firstyday);
-    var result = yearinfo_assign({ yearlen: yearlen,
+    var result = __assign({ yearlen: yearlen,
         nextyearlen: nextyearlen,
         yearordinal: yearordinal,
         yearweekday: yearweekday }, baseYearMasks(year), { wnomask: null });
@@ -2116,8 +2260,8 @@ var rrule_RRule = /** @class */ (function () {
      * Will convert all rules described in nlp:ToText
      * to text.
      */
-    RRule.prototype.toText = function (gettext, language) {
-        return getnlp().toText(this, gettext, language);
+    RRule.prototype.toText = function (gettext, language, dateFormatter) {
+        return getnlp().toText(this, gettext, language, dateFormatter);
     };
     RRule.prototype.isFullyConvertibleToText = function () {
         return getnlp().isFullyConvertible(this);
@@ -2221,170 +2365,8 @@ function iterSet(iterResult, _rrule, _exrule, _rdate, _exdate, tzid) {
     }
 }
 
-// CONCATENATED MODULE: ./src/rruleset.ts
-var rruleset_extends = (undefined && undefined.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    }
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-
-
-
-
-var rruleset_RRuleSet = /** @class */ (function (_super) {
-    rruleset_extends(RRuleSet, _super);
-    /**
-     *
-     * @param {Boolean?} noCache
-     *  The same stratagy as RRule on cache, default to false
-     * @constructor
-     */
-    function RRuleSet(noCache) {
-        if (noCache === void 0) { noCache = false; }
-        var _this = _super.call(this, {}, noCache) || this;
-        _this._rrule = [];
-        _this._rdate = [];
-        _this._exrule = [];
-        _this._exdate = [];
-        return _this;
-    }
-    RRuleSet.prototype.tzid = function (tzid) {
-        if (tzid !== undefined) {
-            this._tzid = tzid;
-        }
-        if (this._tzid !== undefined) {
-            return this._tzid;
-        }
-        for (var i = 0; i < this._rrule.length; i++) {
-            var tzid_1 = this._rrule[i].origOptions.tzid;
-            if (tzid_1) {
-                return tzid_1;
-            }
-        }
-        return undefined;
-    };
-    RRuleSet.prototype._iter = function (iterResult) {
-        return iterSet(iterResult, this._rrule, this._exrule, this._rdate, this._exdate, this.tzid());
-    };
-    /**
-     * Adds an RRule to the set
-     *
-     * @param {RRule}
-     */
-    RRuleSet.prototype.rrule = function (rrule) {
-        _addRule(rrule, this._rrule);
-    };
-    /**
-     * Adds an EXRULE to the set
-     *
-     * @param {RRule}
-     */
-    RRuleSet.prototype.exrule = function (rrule) {
-        _addRule(rrule, this._exrule);
-    };
-    /**
-     * Adds an RDate to the set
-     *
-     * @param {Date}
-     */
-    RRuleSet.prototype.rdate = function (date) {
-        _addDate(date, this._rdate);
-    };
-    /**
-     * Adds an EXDATE to the set
-     *
-     * @param {Date}
-     */
-    RRuleSet.prototype.exdate = function (date) {
-        _addDate(date, this._exdate);
-    };
-    RRuleSet.prototype.valueOf = function () {
-        var result = [];
-        this._rrule.forEach(function (rrule) {
-            result = result.concat(rrule.toString().split('\n'));
-        });
-        this._exrule.forEach(function (exrule) {
-            result = result.concat(exrule.toString().split('\n')
-                .map(function (line) { return line.replace(/^RRULE:/, 'EXRULE:'); })
-                .filter(function (line) { return !/^DTSTART/.test(line); }));
-        });
-        if (this._rdate.length) {
-            result.push(rdatesToString('RDATE', this._rdate, this.tzid()));
-        }
-        if (this._exdate.length) {
-            result.push(rdatesToString('EXDATE', this._exdate, this.tzid()));
-        }
-        return result;
-    };
-    /**
-     * to generate recurrence field such as:
-     *   DTSTART:19970902T010000Z
-     *   RRULE:FREQ=YEARLY;COUNT=2;BYDAY=TU
-     *   RRULE:FREQ=YEARLY;COUNT=1;BYDAY=TH
-     */
-    RRuleSet.prototype.toString = function () {
-        return this.valueOf().join('\n');
-    };
-    /**
-     * Create a new RRuleSet Object completely base on current instance
-     */
-    RRuleSet.prototype.clone = function () {
-        var rrs = new RRuleSet(!!this._cache);
-        this._rrule.forEach(function (rule) { return rrs.rrule(rule.clone()); });
-        this._exrule.forEach(function (rule) { return rrs.exrule(rule.clone()); });
-        this._rdate.forEach(function (date) { return rrs.rdate(new Date(date.getTime())); });
-        this._exdate.forEach(function (date) { return rrs.exdate(new Date(date.getTime())); });
-        return rrs;
-    };
-    return RRuleSet;
-}(src_rrule));
-/* harmony default export */ var rruleset = (rruleset_RRuleSet);
-function _addRule(rrule, collection) {
-    if (!(rrule instanceof src_rrule)) {
-        throw new TypeError(String(rrule) + ' is not RRule instance');
-    }
-    if (!Object(helpers["c" /* includes */])(collection.map(String), String(rrule))) {
-        collection.push(rrule);
-    }
-}
-function _addDate(date, collection) {
-    if (!(date instanceof Date)) {
-        throw new TypeError(String(date) + ' is not Date instance');
-    }
-    if (!Object(helpers["c" /* includes */])(collection.map(Number), Number(date))) {
-        collection.push(date);
-        src_dateutil.sort(collection);
-    }
-}
-function rdatesToString(param, rdates, tzid) {
-    var isUTC = !tzid || tzid.toUpperCase() === 'UTC';
-    var header = isUTC ? param + ":" : param + ";TZID=" + tzid + ":";
-    var dateString = rdates
-        .map(function (rdate) { return src_dateutil.timeToUntilString(rdate.valueOf(), isUTC); })
-        .join(',');
-    return "" + header + dateString;
-}
-
 // CONCATENATED MODULE: ./src/rrulestr.ts
-var rrulestr_assign = (undefined && undefined.__assign) || function () {
-    rrulestr_assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return rrulestr_assign.apply(this, arguments);
-};
+
 
 
 
@@ -2464,6 +2446,7 @@ function buildRule(s, options) {
         exrulevals.length ||
         exdatevals.length) {
         var rset_1 = new rruleset(noCache);
+        rset_1.dtstart(dtstart);
         rset_1.tzid(tzid || undefined);
         rrulevals.forEach(function (val) {
             rset_1.rrule(new src_rrule(groomRruleOptions(val, dtstart, tzid), noCache));
@@ -2481,7 +2464,7 @@ function buildRule(s, options) {
             rset_1.rdate(dtstart);
         return rset_1;
     }
-    var val = rrulevals[0];
+    var val = rrulevals[0] || {};
     return new src_rrule(groomRruleOptions(val, val.dtstart || options.dtstart || dtstart, val.tzid || options.tzid || tzid), noCache);
 }
 function rrulestr(s, options) {
@@ -2489,7 +2472,7 @@ function rrulestr(s, options) {
     return buildRule(s, rrulestr_initializeOptions(options));
 }
 function groomRruleOptions(val, dtstart, tzid) {
-    return rrulestr_assign({}, val, { dtstart: dtstart,
+    return __assign({}, val, { dtstart: dtstart,
         tzid: tzid });
 }
 function rrulestr_initializeOptions(options) {
@@ -2503,7 +2486,7 @@ function rrulestr_initializeOptions(options) {
     if (invalid.length) {
         throw new Error('Invalid options: ' + invalid.join(', '));
     }
-    var initializedOptions = rrulestr_assign({}, options);
+    var initializedOptions = __assign({}, options);
     // Merge in default options
     defaultKeys.forEach(function (key) {
         if (!Object(helpers["c" /* includes */])(keys, key))
@@ -2575,6 +2558,187 @@ function parseRDate(rdateval, parms) {
     return rdateval
         .split(',')
         .map(function (datestr) { return src_dateutil.untilStringToDate(datestr); });
+}
+
+// CONCATENATED MODULE: ./src/rruleset.ts
+
+
+
+
+
+
+
+function createGetterSetter(fieldName) {
+    var _this = this;
+    return function (field) {
+        if (field !== undefined) {
+            _this["_" + fieldName] = field;
+        }
+        if (_this["_" + fieldName] !== undefined) {
+            return _this["_" + fieldName];
+        }
+        for (var i = 0; i < _this._rrule.length; i++) {
+            var field_1 = _this._rrule[i].origOptions[fieldName];
+            if (field_1) {
+                return field_1;
+            }
+        }
+    };
+}
+var rruleset_RRuleSet = /** @class */ (function (_super) {
+    __extends(RRuleSet, _super);
+    /**
+     *
+     * @param {Boolean?} noCache
+     *  The same stratagy as RRule on cache, default to false
+     * @constructor
+     */
+    function RRuleSet(noCache) {
+        if (noCache === void 0) { noCache = false; }
+        var _this = _super.call(this, {}, noCache) || this;
+        _this.dtstart = createGetterSetter.apply(_this, ['dtstart']);
+        _this.tzid = createGetterSetter.apply(_this, ['tzid']);
+        _this._rrule = [];
+        _this._rdate = [];
+        _this._exrule = [];
+        _this._exdate = [];
+        return _this;
+    }
+    RRuleSet.prototype._iter = function (iterResult) {
+        return iterSet(iterResult, this._rrule, this._exrule, this._rdate, this._exdate, this.tzid());
+    };
+    /**
+     * Adds an RRule to the set
+     *
+     * @param {RRule}
+     */
+    RRuleSet.prototype.rrule = function (rrule) {
+        _addRule(rrule, this._rrule);
+    };
+    /**
+     * Adds an EXRULE to the set
+     *
+     * @param {RRule}
+     */
+    RRuleSet.prototype.exrule = function (rrule) {
+        _addRule(rrule, this._exrule);
+    };
+    /**
+     * Adds an RDate to the set
+     *
+     * @param {Date}
+     */
+    RRuleSet.prototype.rdate = function (date) {
+        _addDate(date, this._rdate);
+    };
+    /**
+     * Adds an EXDATE to the set
+     *
+     * @param {Date}
+     */
+    RRuleSet.prototype.exdate = function (date) {
+        _addDate(date, this._exdate);
+    };
+    /**
+     * Get list of included rrules in this recurrence set.
+     *
+     * @return List of rrules
+     */
+    RRuleSet.prototype.rrules = function () {
+        return this._rrule.map(function (e) { return rrulestr(e.toString()); });
+    };
+    /**
+     * Get list of excluded rrules in this recurrence set.
+     *
+     * @return List of exrules
+     */
+    RRuleSet.prototype.exrules = function () {
+        return this._exrule.map(function (e) { return rrulestr(e.toString()); });
+    };
+    /**
+     * Get list of included datetimes in this recurrence set.
+     *
+     * @return List of rdates
+     */
+    RRuleSet.prototype.rdates = function () {
+        return this._rdate.map(function (e) { return new Date(e.getTime()); });
+    };
+    /**
+     * Get list of included datetimes in this recurrence set.
+     *
+     * @return List of exdates
+     */
+    RRuleSet.prototype.exdates = function () {
+        return this._exdate.map(function (e) { return new Date(e.getTime()); });
+    };
+    RRuleSet.prototype.valueOf = function () {
+        var result = [];
+        if (!this._rrule.length && this._dtstart) {
+            result = result.concat(optionsToString({ dtstart: this._dtstart }));
+        }
+        this._rrule.forEach(function (rrule) {
+            result = result.concat(rrule.toString().split('\n'));
+        });
+        this._exrule.forEach(function (exrule) {
+            result = result.concat(exrule.toString().split('\n')
+                .map(function (line) { return line.replace(/^RRULE:/, 'EXRULE:'); })
+                .filter(function (line) { return !/^DTSTART/.test(line); }));
+        });
+        if (this._rdate.length) {
+            result.push(rdatesToString('RDATE', this._rdate, this.tzid()));
+        }
+        if (this._exdate.length) {
+            result.push(rdatesToString('EXDATE', this._exdate, this.tzid()));
+        }
+        return result;
+    };
+    /**
+     * to generate recurrence field such as:
+     *   DTSTART:19970902T010000Z
+     *   RRULE:FREQ=YEARLY;COUNT=2;BYDAY=TU
+     *   RRULE:FREQ=YEARLY;COUNT=1;BYDAY=TH
+     */
+    RRuleSet.prototype.toString = function () {
+        return this.valueOf().join('\n');
+    };
+    /**
+     * Create a new RRuleSet Object completely base on current instance
+     */
+    RRuleSet.prototype.clone = function () {
+        var rrs = new RRuleSet(!!this._cache);
+        this._rrule.forEach(function (rule) { return rrs.rrule(rule.clone()); });
+        this._exrule.forEach(function (rule) { return rrs.exrule(rule.clone()); });
+        this._rdate.forEach(function (date) { return rrs.rdate(new Date(date.getTime())); });
+        this._exdate.forEach(function (date) { return rrs.exdate(new Date(date.getTime())); });
+        return rrs;
+    };
+    return RRuleSet;
+}(src_rrule));
+/* harmony default export */ var rruleset = (rruleset_RRuleSet);
+function _addRule(rrule, collection) {
+    if (!(rrule instanceof src_rrule)) {
+        throw new TypeError(String(rrule) + ' is not RRule instance');
+    }
+    if (!Object(helpers["c" /* includes */])(collection.map(String), String(rrule))) {
+        collection.push(rrule);
+    }
+}
+function _addDate(date, collection) {
+    if (!(date instanceof Date)) {
+        throw new TypeError(String(date) + ' is not Date instance');
+    }
+    if (!Object(helpers["c" /* includes */])(collection.map(Number), Number(date))) {
+        collection.push(date);
+        src_dateutil.sort(collection);
+    }
+}
+function rdatesToString(param, rdates, tzid) {
+    var isUTC = !tzid || tzid.toUpperCase() === 'UTC';
+    var header = isUTC ? param + ":" : param + ";TZID=" + tzid + ":";
+    var dateString = rdates
+        .map(function (rdate) { return src_dateutil.timeToUntilString(rdate.valueOf(), isUTC); })
+        .join(',');
+    return "" + header + dateString;
 }
 
 // CONCATENATED MODULE: ./src/index.ts
@@ -2684,7 +2848,7 @@ var ENGLISH = {
 };
 /* harmony default export */ var i18n = (ENGLISH);
 
-// EXTERNAL MODULE: ./src/index.ts + 22 modules
+// EXTERNAL MODULE: ./src/index.ts + 23 modules
 var src = __webpack_require__(1);
 
 // EXTERNAL MODULE: ./src/helpers.ts
@@ -2704,6 +2868,7 @@ var contains = function (arr, val) {
     return arr.indexOf(val) !== -1;
 };
 var defaultGetText = function (id) { return id.toString(); };
+var defaultDateFormatter = function (year, month, day) { return month + " " + day + ", " + year; };
 /**
  *
  * @param {RRule} rrule
@@ -2713,12 +2878,14 @@ var defaultGetText = function (id) { return id.toString(); };
  * @constructor
  */
 var totext_ToText = /** @class */ (function () {
-    function ToText(rrule, gettext, language) {
+    function ToText(rrule, gettext, language, dateFormatter) {
         if (gettext === void 0) { gettext = defaultGetText; }
         if (language === void 0) { language = i18n; }
+        if (dateFormatter === void 0) { dateFormatter = defaultDateFormatter; }
         this.text = [];
         this.language = language || i18n;
         this.gettext = gettext;
+        this.dateFormatter = dateFormatter;
         this.rrule = rrule;
         this.options = rrule.options;
         this.origOptions = rrule.origOptions;
@@ -2812,9 +2979,7 @@ var totext_ToText = /** @class */ (function () {
         if (this.options.until) {
             this.add(gettext('until'));
             var until = this.options.until;
-            this.add(this.language.monthNames[until.getUTCMonth()])
-                .add(until.getUTCDate() + ',')
-                .add(until.getUTCFullYear().toString());
+            this.add(this.dateFormatter(until.getUTCFullYear(), this.language.monthNames[until.getUTCMonth()], until.getUTCDate()));
         }
         else if (this.options.count) {
             this.add(gettext('for'))
@@ -3604,8 +3769,8 @@ totext.IMPLEMENTED[src["default"].YEARLY] = ['byweekno', 'byyearday'].concat(com
 // =============================================================================
 // Export
 // =============================================================================
-var toText = function (rrule, gettext, language) {
-    return new totext(rrule, gettext, language).toString();
+var toText = function (rrule, gettext, language, dateFormatter) {
+    return new totext(rrule, gettext, language, dateFormatter).toString();
 };
 var isFullyConvertible = totext.isFullyConvertible;
 
